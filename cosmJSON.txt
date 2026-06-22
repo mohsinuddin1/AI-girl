@@ -1,0 +1,1201 @@
+{
+  "code": "3600530559497",
+  "product": {
+    "_id": "3600530559497",
+    "_keywords": [
+      "a",
+      "beauty",
+      "color",
+      "fact",
+      "gluten",
+      "lipstick",
+      "magic",
+      "mauve",
+      "maybelline",
+      "no",
+      "norge",
+      "open",
+      "oreal",
+      "sensational"
+    ],
+    "added_countries_tags": [],
+    "additives_n": 3,
+    "additives_original_tags": [
+      "en:e905ci",
+      "en:e901",
+      "en:e900a"
+    ],
+    "additives_tags": [
+      "en:e900",
+      "en:e900a",
+      "en:e901",
+      "en:e905",
+      "en:e905c",
+      "en:e905ci"
+    ],
+    "allergens": "",
+    "allergens_from_ingredients": "",
+    "allergens_from_user": "(en) ",
+    "allergens_hierarchy": [],
+    "allergens_tags": [],
+    "amino_acids_tags": [],
+    "brands": "L'OREAL NORGE AS",
+    "brands_old": "L'OREAL NORGE AS",
+    "brands_tags": [
+      "l-oreal-norge-as"
+    ],
+    "categories": "Open Beauty Facts",
+    "categories_hierarchy": [
+      "en:non-food-products",
+      "en:open-beauty-facts"
+    ],
+    "categories_lc": "en",
+    "categories_properties": {},
+    "categories_properties_tags": [
+      "all-products",
+      "categories-known",
+      "agribalyse-food-code-unknown",
+      "agribalyse-proxy-food-code-unknown",
+      "ciqual-food-code-unknown",
+      "agribalyse-unknown"
+    ],
+    "categories_tags": [
+      "en:non-food-products",
+      "en:open-beauty-facts"
+    ],
+    "checkers_tags": [],
+    "code": "3600530559497",
+    "codes_tags": [
+      "code-13",
+      "3600530559xxx",
+      "360053055xxxx",
+      "36005305xxxxx",
+      "3600530xxxxxx",
+      "360053xxxxxxx",
+      "36005xxxxxxxx",
+      "3600xxxxxxxxx",
+      "360xxxxxxxxxx",
+      "36xxxxxxxxxxx",
+      "3xxxxxxxxxxxx"
+    ],
+    "compared_to_category": "en:open-beauty-facts",
+    "complete": 0,
+    "completeness": 0.4625,
+    "correctors_tags": [
+      "teolemon"
+    ],
+    "countries": "en:Norway",
+    "countries_hierarchy": [
+      "en:norway"
+    ],
+    "countries_tags": [
+      "en:norway"
+    ],
+    "created_t": 1733423791,
+    "creator": "openfoodfacts-contributors",
+    "data_quality_bugs_tags": [],
+    "data_quality_errors_tags": [],
+    "data_quality_info_tags": [
+      "en:no-packaging-data",
+      "en:ingredients-percent-analysis-ok",
+      "en:environmental-score-extended-data-not-computed",
+      "en:food-groups-1-unknown",
+      "en:food-groups-2-unknown",
+      "en:food-groups-3-unknown"
+    ],
+    "data_quality_tags": [
+      "en:no-packaging-data",
+      "en:ingredients-percent-analysis-ok",
+      "en:environmental-score-extended-data-not-computed",
+      "en:food-groups-1-unknown",
+      "en:food-groups-2-unknown",
+      "en:food-groups-3-unknown",
+      "en:ingredients-unknown-score-above-10",
+      "en:ingredients-80-percent-unknown",
+      "en:ingredients-ingredient-tag-length-greater-than-50",
+      "en:ingredients-ingredient-tag-length-greater-than-100",
+      "en:ingredients-ingredient-tag-length-greater-than-200",
+      "en:environmental-score-origins-of-ingredients-origins-are-100-percent-unknown",
+      "en:environmental-score-packaging-packaging-data-missing",
+      "en:environmental-score-production-system-no-label"
+    ],
+    "data_quality_warnings_tags": [
+      "en:ingredients-unknown-score-above-10",
+      "en:ingredients-80-percent-unknown",
+      "en:ingredients-ingredient-tag-length-greater-than-50",
+      "en:ingredients-ingredient-tag-length-greater-than-100",
+      "en:ingredients-ingredient-tag-length-greater-than-200",
+      "en:environmental-score-origins-of-ingredients-origins-are-100-percent-unknown",
+      "en:environmental-score-packaging-packaging-data-missing",
+      "en:environmental-score-production-system-no-label"
+    ],
+    "ecoscore_data": {
+      "adjustments": {
+        "origins_of_ingredients": {
+          "aggregated_origins": [
+            {
+              "origin": "en:unknown",
+              "percent": 100
+            }
+          ],
+          "epi_score": 0,
+          "epi_value": -5,
+          "origins_from_categories": [
+            "en:unknown"
+          ],
+          "origins_from_origins_field": [
+            "en:unknown"
+          ],
+          "transportation_scores": {
+            "ad": 0,
+            "al": 0,
+            "at": 0,
+            "ax": 0,
+            "ba": 0,
+            "be": 0,
+            "bg": 0,
+            "ch": 0,
+            "cy": 0,
+            "cz": 0,
+            "de": 0,
+            "dk": 0,
+            "dz": 0,
+            "ee": 0,
+            "eg": 0,
+            "es": 0,
+            "fi": 0,
+            "fo": 0,
+            "fr": 0,
+            "gg": 0,
+            "gi": 0,
+            "gr": 0,
+            "hr": 0,
+            "hu": 0,
+            "ie": 0,
+            "il": 0,
+            "im": 0,
+            "is": 0,
+            "it": 0,
+            "je": 0,
+            "lb": 0,
+            "li": 0,
+            "lt": 0,
+            "lu": 0,
+            "lv": 0,
+            "ly": 0,
+            "ma": 0,
+            "mc": 0,
+            "md": 0,
+            "me": 0,
+            "mk": 0,
+            "mt": 0,
+            "nl": 0,
+            "no": 0,
+            "pl": 0,
+            "ps": 0,
+            "pt": 0,
+            "ro": 0,
+            "rs": 0,
+            "se": 0,
+            "si": 0,
+            "sj": 0,
+            "sk": 0,
+            "sm": 0,
+            "sy": 0,
+            "tn": 0,
+            "tr": 0,
+            "ua": 0,
+            "uk": 0,
+            "us": 0,
+            "va": 0,
+            "world": 0,
+            "xk": 0
+          },
+          "transportation_values": {
+            "ad": 0,
+            "al": 0,
+            "at": 0,
+            "ax": 0,
+            "ba": 0,
+            "be": 0,
+            "bg": 0,
+            "ch": 0,
+            "cy": 0,
+            "cz": 0,
+            "de": 0,
+            "dk": 0,
+            "dz": 0,
+            "ee": 0,
+            "eg": 0,
+            "es": 0,
+            "fi": 0,
+            "fo": 0,
+            "fr": 0,
+            "gg": 0,
+            "gi": 0,
+            "gr": 0,
+            "hr": 0,
+            "hu": 0,
+            "ie": 0,
+            "il": 0,
+            "im": 0,
+            "is": 0,
+            "it": 0,
+            "je": 0,
+            "lb": 0,
+            "li": 0,
+            "lt": 0,
+            "lu": 0,
+            "lv": 0,
+            "ly": 0,
+            "ma": 0,
+            "mc": 0,
+            "md": 0,
+            "me": 0,
+            "mk": 0,
+            "mt": 0,
+            "nl": 0,
+            "no": 0,
+            "pl": 0,
+            "ps": 0,
+            "pt": 0,
+            "ro": 0,
+            "rs": 0,
+            "se": 0,
+            "si": 0,
+            "sj": 0,
+            "sk": 0,
+            "sm": 0,
+            "sy": 0,
+            "tn": 0,
+            "tr": 0,
+            "ua": 0,
+            "uk": 0,
+            "us": 0,
+            "va": 0,
+            "world": 0,
+            "xk": 0
+          },
+          "values": {
+            "ad": -5,
+            "al": -5,
+            "at": -5,
+            "ax": -5,
+            "ba": -5,
+            "be": -5,
+            "bg": -5,
+            "ch": -5,
+            "cy": -5,
+            "cz": -5,
+            "de": -5,
+            "dk": -5,
+            "dz": -5,
+            "ee": -5,
+            "eg": -5,
+            "es": -5,
+            "fi": -5,
+            "fo": -5,
+            "fr": -5,
+            "gg": -5,
+            "gi": -5,
+            "gr": -5,
+            "hr": -5,
+            "hu": -5,
+            "ie": -5,
+            "il": -5,
+            "im": -5,
+            "is": -5,
+            "it": -5,
+            "je": -5,
+            "lb": -5,
+            "li": -5,
+            "lt": -5,
+            "lu": -5,
+            "lv": -5,
+            "ly": -5,
+            "ma": -5,
+            "mc": -5,
+            "md": -5,
+            "me": -5,
+            "mk": -5,
+            "mt": -5,
+            "nl": -5,
+            "no": -5,
+            "pl": -5,
+            "ps": -5,
+            "pt": -5,
+            "ro": -5,
+            "rs": -5,
+            "se": -5,
+            "si": -5,
+            "sj": -5,
+            "sk": -5,
+            "sm": -5,
+            "sy": -5,
+            "tn": -5,
+            "tr": -5,
+            "ua": -5,
+            "uk": -5,
+            "us": -5,
+            "va": -5,
+            "world": -5,
+            "xk": -5
+          },
+          "warning": "origins_are_100_percent_unknown"
+        },
+        "packaging": {
+          "value": -15,
+          "warning": "packaging_data_missing"
+        },
+        "production_system": {
+          "labels": [],
+          "value": 0,
+          "warning": "no_label"
+        },
+        "threatened_species": {}
+      },
+      "agribalyse": {
+        "warning": "missing_agribalyse_match"
+      },
+      "missing": {
+        "agb_category": 1,
+        "labels": 1,
+        "origins": 1,
+        "packagings": 1
+      },
+      "missing_agribalyse_match_warning": 1,
+      "missing_key_data": 1,
+      "status": "unknown"
+    },
+    "ecoscore_grade": "unknown",
+    "ecoscore_tags": [
+      "unknown"
+    ],
+    "editors_tags": [
+      "openfoodfacts-contributors",
+      "sebleouf",
+      "teolemon"
+    ],
+    "entry_dates_tags": [
+      "2024-12-05",
+      "2024-12",
+      "2024"
+    ],
+    "food_groups_tags": [],
+    "id": "3600530559497",
+    "image_front_small_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.200.jpg",
+    "image_front_thumb_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.100.jpg",
+    "image_front_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.400.jpg",
+    "image_small_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.200.jpg",
+    "image_thumb_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.100.jpg",
+    "image_url": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.400.jpg",
+    "images": {
+      "1": {
+        "sizes": {
+          "100": {
+            "h": 100,
+            "w": 100
+          },
+          "400": {
+            "h": 400,
+            "w": 400
+          },
+          "full": {
+            "h": 800,
+            "w": 800
+          }
+        },
+        "uploaded_t": 1733423793,
+        "uploader": "openfoodfacts-contributors"
+      },
+      "front_en": {
+        "imgid": "1",
+        "rev": "3",
+        "sizes": {
+          "100": {
+            "h": 100,
+            "w": 56
+          },
+          "200": {
+            "h": 200,
+            "w": 111
+          },
+          "400": {
+            "h": 400,
+            "w": 222
+          },
+          "full": {
+            "h": 720,
+            "w": 400
+          }
+        }
+      }
+    },
+    "informers_tags": [
+      "openfoodfacts-contributors",
+      "sebleouf"
+    ],
+    "ingredients": [
+      {
+        "id": "en:g2406-1-ingredients-lanolin-liquida",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 53.3333333333333,
+        "percent_max": 100,
+        "percent_min": 6.66666666666667,
+        "text": "G2406 1 INGREDIENTS LANOLIN LIQUIDA"
+      },
+      {
+        "id": "en:lanolin-oil-sesamum-indicum-oil",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 23.3333333333333,
+        "percent_max": 50,
+        "percent_min": 0,
+        "text": "LANOLIN OIL SESAMUM INDICUM OIL"
+      },
+      {
+        "id": "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 11.6666666666667,
+        "percent_max": 33.3333333333333,
+        "percent_min": 0,
+        "text": "SESAME SEED OIL OLEYL ERUCATE CERA MICROCRISTALLINA"
+      },
+      {
+        "id": "en:e905ci",
+        "is_in_taxonomy": 1,
+        "percent_estimate": 5.83333333333333,
+        "percent_max": 25,
+        "percent_min": 0,
+        "text": "MICROCRYSTALLINE WAX",
+        "vegan": "yes",
+        "vegetarian": "yes"
+      },
+      {
+        "id": "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 2.91666666666666,
+        "percent_max": 20,
+        "percent_min": 0,
+        "text": "CIRE MICROCRISTALLINE PPG-5 LANOLIN WAX ACETYLATED LANOLIN CERA ALBA"
+      },
+      {
+        "id": "en:e901",
+        "is_in_taxonomy": 1,
+        "percent_estimate": 1.45833333333333,
+        "percent_max": 16.6666666666667,
+        "percent_min": 0,
+        "text": "BEESWAX",
+        "vegan": "no",
+        "vegetarian": "yes"
+      },
+      {
+        "id": "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.729166666666664,
+        "percent_max": 14.2857142857143,
+        "percent_min": 0,
+        "text": "CIRE DABEILLE ALUMINA DISTEARDIMONIUM HECTORITE PARFUM"
+      },
+      {
+        "id": "en:fragrance-tocopheryl-acetate-acrylic-acid",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.364583333333329,
+        "percent_max": 12.5,
+        "percent_min": 0,
+        "text": "FRAGRANCE TOCOPHERYL ACETATE ACRYLIC ACID"
+      },
+      {
+        "id": "en:isobutyl-acrylate",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.182291666666664,
+        "percent_max": 11.1111111111111,
+        "percent_min": 0,
+        "text": "ISOBUTYL ACRYLATE"
+      },
+      {
+        "id": "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.0911458333333286,
+        "percent_max": 10,
+        "percent_min": 0,
+        "text": "ISOBORNYL ACRYLATE COPOLYMER CALCIUM ALUMINUM BOROSILICATE SYNTHETIC FLUORPHLOGOPITE PENTAERYTHRITYL TETRA-DIT-BUTYL HYDROXYHYDROCINNAMATE SILICA CALCIUM SODIUM BOROSILICATE BENZYL ALCOHOL POLYETHYLENE TEREPHTHALATE MEL"
+      },
+      {
+        "ciqual_food_code": "31008",
+        "id": "en:honey",
+        "is_in_taxonomy": 1,
+        "percent_estimate": 0.0455729166666643,
+        "percent_max": 9.09090909090909,
+        "percent_min": 0,
+        "text": "HONEY",
+        "vegan": "no",
+        "vegetarian": "yes"
+      },
+      {
+        "id": "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+        "ingredients": [
+          {
+            "id": "en:",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0113932291666643,
+            "percent_max": 8.33333333333333,
+            "percent_min": 0,
+            "text": "+"
+          },
+          {
+            "id": "en:may-contain",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.00569661458333215,
+            "percent_max": 4.16666666666667,
+            "percent_min": 0,
+            "text": "MAY CONTAIN"
+          },
+          {
+            "id": "en:peut-contenir-mica-ci-77891",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.00284830729166607,
+            "percent_max": 2.77777777777778,
+            "percent_min": 0,
+            "text": "PEUT CONTENIR MICA CI 77891"
+          },
+          {
+            "id": "en:titanium-dioxide-ci-77491",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.00142415364583304,
+            "percent_max": 2.08333333333333,
+            "percent_min": 0,
+            "text": "TITANIUM DIOXIDE CI 77491"
+          },
+          {
+            "id": "en:ci-77492",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.000712076822916519,
+            "percent_max": 1.66666666666667,
+            "percent_min": 0,
+            "text": "CI 77492"
+          },
+          {
+            "id": "en:ci-77499",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.000356038411458259,
+            "percent_max": 1.38888888888889,
+            "percent_min": 0,
+            "text": "CI 77499"
+          },
+          {
+            "id": "en:iron-oxides-ci-15850",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.00017801920572913,
+            "percent_max": 1.19047619047619,
+            "percent_min": 0,
+            "text": "IRON OXIDES CI 15850"
+          },
+          {
+            "id": "en:red-7-ci-45410",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0000890096028645648,
+            "percent_max": 1.04166666666667,
+            "percent_min": 0,
+            "text": "RED 7 CI 45410"
+          },
+          {
+            "id": "en:red-28-lake-ci-45380",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0000445048014322824,
+            "percent_max": 0.925925925925926,
+            "percent_min": 0,
+            "text": "RED 28 LAKE CI 45380"
+          },
+          {
+            "id": "en:red-22-lake-ci-15985",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0000222524007161412,
+            "percent_max": 0.833333333333333,
+            "percent_min": 0,
+            "text": "RED 22 LAKE CI 15985"
+          },
+          {
+            "id": "en:yellow-6-lake-ci-19140",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0000111262003580706,
+            "percent_max": 0.757575757575758,
+            "percent_min": 0,
+            "text": "YELLOW 6 LAKE CI 19140"
+          },
+          {
+            "id": "en:yellow-5-lake-ci-42090",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.0000055631001790353,
+            "percent_max": 0.694444444444445,
+            "percent_min": 0,
+            "text": "YELLOW 5 LAKE CI 42090"
+          },
+          {
+            "id": "en:blue-1-lake-ci-75470",
+            "is_in_taxonomy": 0,
+            "percent_estimate": 0.00000278155008951765,
+            "percent_max": 0.641025641025641,
+            "percent_min": 0,
+            "text": "BLUE 1 LAKE CI 75470"
+          },
+          {
+            "id": "en:e120",
+            "is_in_taxonomy": 1,
+            "percent_estimate": 0.00000278155008951592,
+            "percent_max": 0.595238095238095,
+            "percent_min": 0,
+            "text": "CARMINE",
+            "vegan": "no",
+            "vegetarian": "no"
+          }
+        ],
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.0227864583333286,
+        "percent_max": 8.33333333333333,
+        "percent_min": 0,
+        "text": "MIEL TIN OXIDE ALUMINUM HYDROXIDE ACRYLATES COPOLYMER DIMETHICONE"
+      },
+      {
+        "id": "en:f-i-l",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.0113932291666643,
+        "percent_max": 7.69230769230769,
+        "percent_min": 0,
+        "text": "F.I.L"
+      },
+      {
+        "id": "en:d38427",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.0056966145833286,
+        "percent_max": 7.14285714285714,
+        "percent_min": 0,
+        "text": "D38427"
+      },
+      {
+        "id": "en:2",
+        "is_in_taxonomy": 0,
+        "percent_estimate": 0.0056966145833286,
+        "percent_max": 6.66666666666667,
+        "percent_min": 0,
+        "text": "2"
+      }
+    ],
+    "ingredients_analysis": {
+      "en:non-vegan": [
+        "en:e901",
+        "en:honey",
+        "en:e120"
+      ],
+      "en:non-vegetarian": [
+        "en:e120"
+      ],
+      "en:palm-oil-content-unknown": [
+        "en:g2406-1-ingredients-lanolin-liquida",
+        "en:lanolin-oil-sesamum-indicum-oil",
+        "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+        "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+        "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+        "en:fragrance-tocopheryl-acetate-acrylic-acid",
+        "en:isobutyl-acrylate",
+        "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+        "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+        "en:",
+        "en:may-contain",
+        "en:peut-contenir-mica-ci-77891",
+        "en:titanium-dioxide-ci-77491",
+        "en:ci-77492",
+        "en:ci-77499",
+        "en:iron-oxides-ci-15850",
+        "en:red-7-ci-45410",
+        "en:red-28-lake-ci-45380",
+        "en:red-22-lake-ci-15985",
+        "en:yellow-6-lake-ci-19140",
+        "en:yellow-5-lake-ci-42090",
+        "en:blue-1-lake-ci-75470",
+        "en:f-i-l",
+        "en:d38427",
+        "en:2"
+      ],
+      "en:vegan-status-unknown": [
+        "en:g2406-1-ingredients-lanolin-liquida",
+        "en:lanolin-oil-sesamum-indicum-oil",
+        "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+        "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+        "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+        "en:fragrance-tocopheryl-acetate-acrylic-acid",
+        "en:isobutyl-acrylate",
+        "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+        "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+        "en:",
+        "en:may-contain",
+        "en:peut-contenir-mica-ci-77891",
+        "en:titanium-dioxide-ci-77491",
+        "en:ci-77492",
+        "en:ci-77499",
+        "en:iron-oxides-ci-15850",
+        "en:red-7-ci-45410",
+        "en:red-28-lake-ci-45380",
+        "en:red-22-lake-ci-15985",
+        "en:yellow-6-lake-ci-19140",
+        "en:yellow-5-lake-ci-42090",
+        "en:blue-1-lake-ci-75470",
+        "en:f-i-l",
+        "en:d38427",
+        "en:2"
+      ],
+      "en:vegetarian-status-unknown": [
+        "en:g2406-1-ingredients-lanolin-liquida",
+        "en:lanolin-oil-sesamum-indicum-oil",
+        "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+        "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+        "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+        "en:fragrance-tocopheryl-acetate-acrylic-acid",
+        "en:isobutyl-acrylate",
+        "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+        "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+        "en:",
+        "en:may-contain",
+        "en:peut-contenir-mica-ci-77891",
+        "en:titanium-dioxide-ci-77491",
+        "en:ci-77492",
+        "en:ci-77499",
+        "en:iron-oxides-ci-15850",
+        "en:red-7-ci-45410",
+        "en:red-28-lake-ci-45380",
+        "en:red-22-lake-ci-15985",
+        "en:yellow-6-lake-ci-19140",
+        "en:yellow-5-lake-ci-42090",
+        "en:blue-1-lake-ci-75470",
+        "en:f-i-l",
+        "en:d38427",
+        "en:2"
+      ]
+    },
+    "ingredients_analysis_tags": [
+      "en:palm-oil-content-unknown",
+      "en:non-vegan",
+      "en:non-vegetarian"
+    ],
+    "ingredients_hierarchy": [
+      "en:g2406-1-ingredients-lanolin-liquida",
+      "en:lanolin-oil-sesamum-indicum-oil",
+      "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+      "en:e905ci",
+      "en:e905",
+      "en:e905c",
+      "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+      "en:e901",
+      "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+      "en:fragrance-tocopheryl-acetate-acrylic-acid",
+      "en:isobutyl-acrylate",
+      "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+      "en:honey",
+      "en:added-sugar",
+      "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+      "en:f-i-l",
+      "en:d38427",
+      "en:2",
+      "en:may-contain",
+      "en:peut-contenir-mica-ci-77891",
+      "en:titanium-dioxide-ci-77491",
+      "en:ci-77492",
+      "en:ci-77499",
+      "en:iron-oxides-ci-15850",
+      "en:red-7-ci-45410",
+      "en:red-28-lake-ci-45380",
+      "en:red-22-lake-ci-15985",
+      "en:yellow-6-lake-ci-19140",
+      "en:yellow-5-lake-ci-42090",
+      "en:blue-1-lake-ci-75470",
+      "en:e120"
+    ],
+    "ingredients_lc": "en",
+    "ingredients_n": 29,
+    "ingredients_n_tags": [
+      "29",
+      "21-30"
+    ],
+    "ingredients_non_nutritive_sweeteners_n": 0,
+    "ingredients_original_tags": [
+      "en:g2406-1-ingredients-lanolin-liquida",
+      "en:lanolin-oil-sesamum-indicum-oil",
+      "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+      "en:e905ci",
+      "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+      "en:e901",
+      "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+      "en:fragrance-tocopheryl-acetate-acrylic-acid",
+      "en:isobutyl-acrylate",
+      "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+      "en:honey",
+      "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+      "en:f-i-l",
+      "en:d38427",
+      "en:2",
+      "en:",
+      "en:may-contain",
+      "en:peut-contenir-mica-ci-77891",
+      "en:titanium-dioxide-ci-77491",
+      "en:ci-77492",
+      "en:ci-77499",
+      "en:iron-oxides-ci-15850",
+      "en:red-7-ci-45410",
+      "en:red-28-lake-ci-45380",
+      "en:red-22-lake-ci-15985",
+      "en:yellow-6-lake-ci-19140",
+      "en:yellow-5-lake-ci-42090",
+      "en:blue-1-lake-ci-75470",
+      "en:e120"
+    ],
+    "ingredients_percent_analysis": 1,
+    "ingredients_sweeteners_n": 0,
+    "ingredients_tags": [
+      "en:g2406-1-ingredients-lanolin-liquida",
+      "en:lanolin-oil-sesamum-indicum-oil",
+      "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+      "en:e905ci",
+      "en:e905",
+      "en:e905c",
+      "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+      "en:e901",
+      "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+      "en:fragrance-tocopheryl-acetate-acrylic-acid",
+      "en:isobutyl-acrylate",
+      "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+      "en:honey",
+      "en:added-sugar",
+      "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+      "en:f-i-l",
+      "en:d38427",
+      "en:2",
+      "en:may-contain",
+      "en:peut-contenir-mica-ci-77891",
+      "en:titanium-dioxide-ci-77491",
+      "en:ci-77492",
+      "en:ci-77499",
+      "en:iron-oxides-ci-15850",
+      "en:red-7-ci-45410",
+      "en:red-28-lake-ci-45380",
+      "en:red-22-lake-ci-15985",
+      "en:yellow-6-lake-ci-19140",
+      "en:yellow-5-lake-ci-42090",
+      "en:blue-1-lake-ci-75470",
+      "en:e120"
+    ],
+    "ingredients_text": "G2406 1 INGREDIENTS LANOLIN LIQUIDA / LANOLIN OIL SESAMUM INDICUM OIL / SESAME SEED OIL OLEYL ERUCATE CERA MICROCRISTALLINA / MICROCRYSTALLINE WAX / CIRE MICROCRISTALLINE PPG-5 LANOLIN WAX ACETYLATED LANOLIN CERA ALBA / BEESWAX / CIRE DABEILLE ALUMINA DISTEARDIMONIUM HECTORITE PARFUM / FRAGRANCE TOCOPHERYL ACETATE ACRYLIC ACID/ISOBUTYL ACRYLATE/ISOBORNYL ACRYLATE COPOLYMER CALCIUM ALUMINUM BOROSILICATE SYNTHETIC FLUORPHLOGOPITE PENTAERYTHRITYL TETRA-DI-T-BUTYL HYDROXYHYDROCINNAMATE SILICA CALCIUM SODIUM BOROSILICATE BENZYL ALCOHOL POLYETHYLENE TEREPHTHALATE MEL / HONEY / MIEL TIN OXIDE ALUMINUM HYDROXIDE ACRYLATES COPOLYMER DIMETHICONE [+/- MAY CONTAIN / PEUT CONTENIR MICA CI 77891 / TITANIUM DIOXIDE CI 77491, CI 77492, CI 77499 / IRON OXIDES CI 15850 / RED 7 CI 45410 / RED 28 LAKE CI 45380 / RED 22 LAKE CI 15985 / YELLOW 6 LAKE CI 19140 / YELLOW 5 LAKE CI 42090 / BLUE 1 LAKE CI 75470 / CARMINE ] F.I.L. D38427/2",
+    "ingredients_text_en": "G2406 1 INGREDIENTS LANOLIN LIQUIDA / LANOLIN OIL SESAMUM INDICUM OIL / SESAME SEED OIL OLEYL ERUCATE CERA MICROCRISTALLINA / MICROCRYSTALLINE WAX / CIRE MICROCRISTALLINE PPG-5 LANOLIN WAX ACETYLATED LANOLIN CERA ALBA / BEESWAX / CIRE DABEILLE ALUMINA DISTEARDIMONIUM HECTORITE PARFUM / FRAGRANCE TOCOPHERYL ACETATE ACRYLIC ACID/ISOBUTYL ACRYLATE/ISOBORNYL ACRYLATE COPOLYMER CALCIUM ALUMINUM BOROSILICATE SYNTHETIC FLUORPHLOGOPITE PENTAERYTHRITYL TETRA-DI-T-BUTYL HYDROXYHYDROCINNAMATE SILICA CALCIUM SODIUM BOROSILICATE BENZYL ALCOHOL POLYETHYLENE TEREPHTHALATE MEL / HONEY / MIEL TIN OXIDE ALUMINUM HYDROXIDE ACRYLATES COPOLYMER DIMETHICONE [+/- MAY CONTAIN / PEUT CONTENIR MICA CI 77891 / TITANIUM DIOXIDE CI 77491, CI 77492, CI 77499 / IRON OXIDES CI 15850 / RED 7 CI 45410 / RED 28 LAKE CI 45380 / RED 22 LAKE CI 15985 / YELLOW 6 LAKE CI 19140 / YELLOW 5 LAKE CI 42090 / BLUE 1 LAKE CI 75470 / CARMINE ] F.I.L. D38427/2",
+    "ingredients_text_with_allergens": "G2406 1 INGREDIENTS LANOLIN LIQUIDA / LANOLIN OIL SESAMUM INDICUM OIL / SESAME SEED OIL OLEYL ERUCATE CERA MICROCRISTALLINA / MICROCRYSTALLINE WAX / CIRE MICROCRISTALLINE PPG-5 LANOLIN WAX ACETYLATED LANOLIN CERA ALBA / BEESWAX / CIRE DABEILLE ALUMINA DISTEARDIMONIUM HECTORITE PARFUM / FRAGRANCE TOCOPHERYL ACETATE ACRYLIC ACID/ISOBUTYL ACRYLATE/ISOBORNYL ACRYLATE COPOLYMER CALCIUM ALUMINUM BOROSILICATE SYNTHETIC FLUORPHLOGOPITE PENTAERYTHRITYL TETRA-DI-T-BUTYL HYDROXYHYDROCINNAMATE SILICA CALCIUM SODIUM BOROSILICATE BENZYL ALCOHOL POLYETHYLENE TEREPHTHALATE MEL / HONEY / MIEL TIN OXIDE ALUMINUM HYDROXIDE ACRYLATES COPOLYMER DIMETHICONE [+/- MAY CONTAIN / PEUT CONTENIR MICA CI 77891 / TITANIUM DIOXIDE CI 77491, CI 77492, CI 77499 / IRON OXIDES CI 15850 / RED 7 CI 45410 / RED 28 LAKE CI 45380 / RED 22 LAKE CI 15985 / YELLOW 6 LAKE CI 19140 / YELLOW 5 LAKE CI 42090 / BLUE 1 LAKE CI 75470 / CARMINE ] F.I.L. D38427/2",
+    "ingredients_text_with_allergens_en": "G2406 1 INGREDIENTS LANOLIN LIQUIDA / LANOLIN OIL SESAMUM INDICUM OIL / SESAME SEED OIL OLEYL ERUCATE CERA MICROCRISTALLINA / MICROCRYSTALLINE WAX / CIRE MICROCRISTALLINE PPG-5 LANOLIN WAX ACETYLATED LANOLIN CERA ALBA / BEESWAX / CIRE DABEILLE ALUMINA DISTEARDIMONIUM HECTORITE PARFUM / FRAGRANCE TOCOPHERYL ACETATE ACRYLIC ACID/ISOBUTYL ACRYLATE/ISOBORNYL ACRYLATE COPOLYMER CALCIUM ALUMINUM BOROSILICATE SYNTHETIC FLUORPHLOGOPITE PENTAERYTHRITYL TETRA-DI-T-BUTYL HYDROXYHYDROCINNAMATE SILICA CALCIUM SODIUM BOROSILICATE BENZYL ALCOHOL POLYETHYLENE TEREPHTHALATE MEL / HONEY / MIEL TIN OXIDE ALUMINUM HYDROXIDE ACRYLATES COPOLYMER DIMETHICONE [+/- MAY CONTAIN / PEUT CONTENIR MICA CI 77891 / TITANIUM DIOXIDE CI 77491, CI 77492, CI 77499 / IRON OXIDES CI 15850 / RED 7 CI 45410 / RED 28 LAKE CI 45380 / RED 22 LAKE CI 15985 / YELLOW 6 LAKE CI 19140 / YELLOW 5 LAKE CI 42090 / BLUE 1 LAKE CI 75470 / CARMINE ] F.I.L. D38427/2",
+    "ingredients_with_specified_percent_n": 0,
+    "ingredients_with_specified_percent_sum": 0,
+    "ingredients_with_unspecified_percent_n": 28,
+    "ingredients_with_unspecified_percent_sum": 100,
+    "ingredients_without_ciqual_codes": [
+      "en:",
+      "en:2",
+      "en:blue-1-lake-ci-75470",
+      "en:ci-77492",
+      "en:ci-77499",
+      "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+      "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+      "en:d38427",
+      "en:e120",
+      "en:e901",
+      "en:e905ci",
+      "en:f-i-l",
+      "en:fragrance-tocopheryl-acetate-acrylic-acid",
+      "en:g2406-1-ingredients-lanolin-liquida",
+      "en:iron-oxides-ci-15850",
+      "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+      "en:isobutyl-acrylate",
+      "en:lanolin-oil-sesamum-indicum-oil",
+      "en:may-contain",
+      "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+      "en:peut-contenir-mica-ci-77891",
+      "en:red-22-lake-ci-15985",
+      "en:red-28-lake-ci-45380",
+      "en:red-7-ci-45410",
+      "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+      "en:titanium-dioxide-ci-77491",
+      "en:yellow-5-lake-ci-42090",
+      "en:yellow-6-lake-ci-19140"
+    ],
+    "ingredients_without_ciqual_codes_n": 28,
+    "ingredients_without_ecobalyse_ids": [
+      "en:",
+      "en:2",
+      "en:blue-1-lake-ci-75470",
+      "en:ci-77492",
+      "en:ci-77499",
+      "en:cire-dabeille-alumina-disteardimonium-hectorite-parfum",
+      "en:cire-microcristalline-ppg-5-lanolin-wax-acetylated-lanolin-cera-alba",
+      "en:d38427",
+      "en:e120",
+      "en:e901",
+      "en:e905ci",
+      "en:f-i-l",
+      "en:fragrance-tocopheryl-acetate-acrylic-acid",
+      "en:g2406-1-ingredients-lanolin-liquida",
+      "en:honey",
+      "en:iron-oxides-ci-15850",
+      "en:isobornyl-acrylate-copolymer-calcium-aluminum-borosilicate-synthetic-fluorphlogopite-pentaerythrityl-tetra-dit-butyl-hydroxyhydrocinnamate-silica-calcium-sodium-borosilicate-benzyl-alcohol-polyethylene-terephthalate-mel",
+      "en:isobutyl-acrylate",
+      "en:lanolin-oil-sesamum-indicum-oil",
+      "en:may-contain",
+      "en:miel-tin-oxide-aluminum-hydroxide-acrylates-copolymer-dimethicone",
+      "en:peut-contenir-mica-ci-77891",
+      "en:red-22-lake-ci-15985",
+      "en:red-28-lake-ci-45380",
+      "en:red-7-ci-45410",
+      "en:sesame-seed-oil-oleyl-erucate-cera-microcristallina",
+      "en:titanium-dioxide-ci-77491",
+      "en:yellow-5-lake-ci-42090",
+      "en:yellow-6-lake-ci-19140"
+    ],
+    "ingredients_without_ecobalyse_ids_n": 29,
+    "interface_version_created": "20150316.jqm2",
+    "interface_version_modified": "20150316.jqm2",
+    "known_ingredients_n": 7,
+    "labels": "No gluten",
+    "labels_hierarchy": [
+      "en:no-gluten"
+    ],
+    "labels_lc": "en",
+    "labels_tags": [
+      "en:no-gluten"
+    ],
+    "lang": "en",
+    "languages": {
+      "en:english": 3
+    },
+    "languages_codes": {
+      "en": 3
+    },
+    "languages_hierarchy": [
+      "en:english"
+    ],
+    "languages_tags": [
+      "en:english",
+      "en:1"
+    ],
+    "last_edit_dates_tags": [
+      "2025-01-04",
+      "2025-01",
+      "2025"
+    ],
+    "last_editor": "teolemon",
+    "last_image_dates_tags": [
+      "2024-12-05",
+      "2024-12",
+      "2024"
+    ],
+    "last_image_t": 1733423793,
+    "last_modified_by": "teolemon",
+    "last_modified_t": 1735997924,
+    "last_updated_t": 1743166966,
+    "lc": "en",
+    "main_countries_tags": [],
+    "max_imgid": "1",
+    "minerals_tags": [],
+    "misc_tags": [
+      "en:environmental-score-extended-data-not-computed",
+      "en:environmental-score-not-computed",
+      "en:nutriscore-missing-nutrition-data",
+      "en:nutriscore-missing-nutrition-data-energy",
+      "en:nutriscore-missing-nutrition-data-fat",
+      "en:nutriscore-missing-nutrition-data-proteins",
+      "en:nutriscore-missing-nutrition-data-saturated-fat",
+      "en:nutriscore-missing-nutrition-data-sodium",
+      "en:nutriscore-missing-nutrition-data-sugars",
+      "en:nutriscore-not-applicable",
+      "en:nutriscore-not-computed",
+      "en:nutrition-fruits-vegetables-legumes-estimate-from-ingredients",
+      "en:nutrition-fruits-vegetables-nuts-estimate-from-ingredients",
+      "en:nutrition-no-fiber",
+      "en:nutrition-no-fiber-or-fruits-vegetables-nuts",
+      "en:nutrition-not-enough-data-to-compute-nutrition-score",
+      "en:packagings-empty",
+      "en:packagings-not-complete",
+      "en:packagings-number-of-components-0",
+      "en:main-countries-new-product"
+    ],
+    "nova_group_debug": "no nova group for non food products",
+    "nova_groups_tags": [
+      "not-applicable"
+    ],
+    "nucleotides_tags": [],
+    "nutrient_levels": {},
+    "nutrient_levels_tags": [],
+    "nutriscore": {
+      "2021": {
+        "category_available": 1,
+        "data": {
+          "energy": null,
+          "fiber": 0,
+          "fruits_vegetables_nuts_colza_walnut_olive_oils": 0,
+          "is_beverage": 0,
+          "is_cheese": 0,
+          "is_fat": 0,
+          "is_water": 0,
+          "proteins": null,
+          "saturated_fat": null,
+          "sodium": null,
+          "sugars": null
+        },
+        "grade": "not-applicable",
+        "not_applicable_category": "en:non-food-products",
+        "nutrients_available": 0,
+        "nutriscore_applicable": 0,
+        "nutriscore_computed": 0
+      },
+      "2023": {
+        "category_available": 1,
+        "data": {
+          "energy": null,
+          "fiber": null,
+          "fruits_vegetables_legumes": 0,
+          "is_beverage": 0,
+          "is_cheese": 0,
+          "is_fat_oil_nuts_seeds": 0,
+          "is_red_meat_product": 0,
+          "is_water": 0,
+          "proteins": null,
+          "salt": null,
+          "saturated_fat": null,
+          "sugars": null
+        },
+        "grade": "not-applicable",
+        "not_applicable_category": "en:non-food-products",
+        "nutrients_available": 0,
+        "nutriscore_applicable": 0,
+        "nutriscore_computed": 0
+      }
+    },
+    "nutriscore_2021_tags": [
+      "not-applicable"
+    ],
+    "nutriscore_2023_tags": [
+      "not-applicable"
+    ],
+    "nutriscore_data": {
+      "nutriscore_not_applicable_for_category": "en:non-food-products"
+    },
+    "nutriscore_grade": "not-applicable",
+    "nutriscore_tags": [
+      "not-applicable"
+    ],
+    "nutriscore_version": "2023",
+    "nutrition_data_per": "100g",
+    "nutrition_data_prepared_per": "100g",
+    "nutrition_grade_fr": "not-applicable",
+    "nutrition_grades": "not-applicable",
+    "nutrition_grades_tags": [
+      "not-applicable"
+    ],
+    "nutrition_score_beverage": 0,
+    "nutrition_score_debug": "no nutriscore for category en:non-food-products - missing energy_100g - missing fat_100g - missing saturated-fat_100g - missing sugars_100g - missing sodium_100g - missing proteins_100g",
+    "nutrition_score_warning_fruits_vegetables_legumes_estimate_from_ingredients": 1,
+    "nutrition_score_warning_fruits_vegetables_legumes_estimate_from_ingredients_value": 0,
+    "nutrition_score_warning_fruits_vegetables_nuts_estimate_from_ingredients": 1,
+    "nutrition_score_warning_fruits_vegetables_nuts_estimate_from_ingredients_value": 0,
+    "nutrition_score_warning_no_fiber": 1,
+    "other_nutritional_substances_tags": [],
+    "packaging_materials_tags": [],
+    "packaging_recycling_tags": [],
+    "packaging_shapes_tags": [],
+    "packagings": [],
+    "packagings_materials": {},
+    "photographers_tags": [
+      "openfoodfacts-contributors"
+    ],
+    "pnns_groups_1": "unknown",
+    "pnns_groups_1_tags": [
+      "unknown",
+      "missing-association"
+    ],
+    "pnns_groups_2": "unknown",
+    "pnns_groups_2_tags": [
+      "unknown",
+      "missing-association"
+    ],
+    "popularity_key": 12,
+    "product_name": "Maybelline Color Sensational Lipstick Magic Mauve",
+    "product_name_en": "Maybelline Color Sensational Lipstick Magic Mauve",
+    "product_type": "beauty",
+    "quantity": "",
+    "removed_countries_tags": [],
+    "rev": 6,
+    "schema_version": 998,
+    "selected_images": {
+      "front": {
+        "display": {
+          "en": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.400.jpg"
+        },
+        "small": {
+          "en": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.200.jpg"
+        },
+        "thumb": {
+          "en": "https://images.openbeautyfacts.org/images/products/360/053/055/9497/front_en.3.100.jpg"
+        }
+      }
+    },
+    "states": "en:to-be-completed, en:nutrition-facts-to-be-completed, en:ingredients-completed, en:expiration-date-to-be-completed, en:packaging-code-to-be-completed, en:characteristics-to-be-completed, en:origins-to-be-completed, en:categories-completed, en:brands-completed, en:packaging-to-be-completed, en:quantity-to-be-completed, en:product-name-completed, en:photos-to-be-validated, en:packaging-photo-to-be-selected, en:nutrition-photo-to-be-selected, en:ingredients-photo-to-be-selected, en:front-photo-selected, en:photos-uploaded",
+    "states_hierarchy": [
+      "en:to-be-completed",
+      "en:nutrition-facts-to-be-completed",
+      "en:ingredients-completed",
+      "en:expiration-date-to-be-completed",
+      "en:packaging-code-to-be-completed",
+      "en:characteristics-to-be-completed",
+      "en:origins-to-be-completed",
+      "en:categories-completed",
+      "en:brands-completed",
+      "en:packaging-to-be-completed",
+      "en:quantity-to-be-completed",
+      "en:product-name-completed",
+      "en:photos-to-be-validated",
+      "en:packaging-photo-to-be-selected",
+      "en:nutrition-photo-to-be-selected",
+      "en:ingredients-photo-to-be-selected",
+      "en:front-photo-selected",
+      "en:photos-uploaded"
+    ],
+    "states_tags": [
+      "en:to-be-completed",
+      "en:nutrition-facts-to-be-completed",
+      "en:ingredients-completed",
+      "en:expiration-date-to-be-completed",
+      "en:packaging-code-to-be-completed",
+      "en:characteristics-to-be-completed",
+      "en:origins-to-be-completed",
+      "en:categories-completed",
+      "en:brands-completed",
+      "en:packaging-to-be-completed",
+      "en:quantity-to-be-completed",
+      "en:product-name-completed",
+      "en:photos-to-be-validated",
+      "en:packaging-photo-to-be-selected",
+      "en:nutrition-photo-to-be-selected",
+      "en:ingredients-photo-to-be-selected",
+      "en:front-photo-selected",
+      "en:photos-uploaded"
+    ],
+    "teams": "chocolatine,la-robe-est-bleue",
+    "teams_tags": [
+      "chocolatine",
+      "la-robe-est-bleue"
+    ],
+    "traces": "",
+    "traces_from_ingredients": "",
+    "traces_from_user": "(en) ",
+    "traces_hierarchy": [],
+    "traces_tags": [],
+    "unknown_ingredients_n": 24,
+    "unknown_nutrients_tags": [],
+    "update_key": "key_1743168287",
+    "vitamins_tags": [],
+    "weighers_tags": []
+  },
+  "status": 1,
+  "status_verbose": "product found"
+}

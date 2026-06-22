@@ -1,0 +1,12 @@
+select
+  cron.schedule(
+    'daily-storage-cleanup',
+    '0 0 * * *', -- Runs at Midnight every day
+    $$
+    select
+      net.http_post(
+          url:='https://iiqwcbgtqpnixvavvdwn.supabase.co/functions/v1/cleanup-storage',
+          headers:='{"Authorization": "Bearer " || MED_SUPABASE_ANON_KEY}'::jsonb
+      )
+    $$
+  );

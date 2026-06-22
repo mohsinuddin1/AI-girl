@@ -1,0 +1,115 @@
+{
+  "expo": {
+    "name": "MedGPT",
+    "slug": "med-gpt",
+    "version": "1.0",
+    "orientation": "portrait",
+    "icon": "./assets/appIconwhiteBG.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "medgpt",
+    "splash": {
+      "image": "./assets/apptext.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "requireFullScreen": true,
+      "bundleIdentifier": "com.medgptai.app",
+      "appleTeamId": "WLYU82D3WY",
+      "infoPlist": {
+        "NSCameraUsageDescription": "MedGPT uses the camera to instantly scan medical reports for AI analysis.",
+        "NSPhotoLibraryUsageDescription": "MedGPT needs photo library access to analyze medical reports from your gallery.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.114203601426-um0q8l9thoefoqtn6fn07n7vrn5epsv2"
+            ]
+          }
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/appIconwhiteBG.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.medgptai.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "com.android.vending.BILLING",
+        "com.google.android.gms.permission.AD_ID"
+      ]
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#ffffff"
+    },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#ffffff",
+      "translucent": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MedGPT needs camera access to scan medical reports."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MedGPT needs photo access to analyze medical reports."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notificationIcon.png",
+          "color": "#0f172a"
+        }
+      ],
+      "@react-native-google-signin/google-signin",
+      "expo-apple-authentication",
+      "expo-localization",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useLegacyPackaging": false
+          }
+        }
+      ],
+      "./plugins/withCustomAndroidConfig",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "medgpt"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "617f0867-347f-4be6-8783-668a868407e1"
+      }
+    },
+    "owner": "mohsinuddin1s-organization",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/617f0867-347f-4be6-8783-668a868407e1"
+    }
+  }
+}
