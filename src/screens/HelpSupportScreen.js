@@ -14,7 +14,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const FAQS = [
     {
-        q: 'How does MedGPT analyze products?',
+        q: 'How does AIGirl analyze products?',
         a: 'We use advanced AI models trained on global cosmetic and food databases to read ingredients from your images and instantly flag known harmful chemicals, endocrine disruptors, and allergens.',
     },
     {

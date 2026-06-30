@@ -631,8 +631,8 @@ export default function ResultScreen({ route, navigation }) {
     const handleShare = async () => {
         try {
             const productName = result.product_name || result.productName || 'Scanned Product';
-            const message = `Check out the safety scan for ${productName} on MedGPT! Grade: ${grade}. ${harmfulChemicals.length} ingredients of concern found.`;
-            await Share.share({ message, title: 'MedGPT Result' });
+            const message = `Check out the safety scan for ${productName} on AIGirl! Grade: ${grade}. ${harmfulChemicals.length} ingredients of concern found.`;
+            await Share.share({ message, title: 'AIGirl Result' });
         } catch (error) {
             console.log('Error sharing:', error);
         }

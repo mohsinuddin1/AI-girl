@@ -11,885 +11,621 @@ import {
     ScrollView,
     Image,
     Alert,
-    Switch
+    PanResponder,
+    ActivityIndicator
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { scale, verticalScale, moderateScale, height } from '../utils/responsive';
 import Animated, {
-    FadeIn,
     FadeInDown,
     FadeInUp,
     ZoomIn,
     useSharedValue,
-    useAnimatedStyle,
-    withRepeat,
     withTiming,
-    Easing,
+    Easing
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import * as StoreReview from 'expo-store-review';
-import { Colors, Radii, Shadows } from '../theme';
 import { useAuth } from '../features/auth/AuthProvider';
 import useStore from '../store/useStore';
 import { posthog } from '../lib/posthog';
+import { supabase } from '../lib/supabase';
 
-// ─── Custom Pill Component ───
-function SelectablePill({ label, isSelected, onPress, icon }) {
-    return (
-        <Animated.View entering={FadeInDown.springify().mass(0.6)} style={{ width: '100%', marginBottom: 12 }}>
-            <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={[styles.pill, isSelected && styles.pillSelected]}>
-                {icon && <Ionicons name={icon} size={20} color={isSelected ? Colors.accent : Colors.textSecondary} style={{ marginRight: 12 }} />}
-                <Text style={[styles.pillText, isSelected && styles.pillTextSelected]}>{label}</Text>
-                {isSelected && <Ionicons name="checkmark-circle" size={20} color={Colors.accent} style={{ marginLeft: 'auto' }} />}
-            </TouchableOpacity>
-        </Animated.View>
-    );
-}
+const { width, height } = Dimensions.get('window');
 
-// ════════════════════════════════
-// NEW SLIDE FUNNEL
-// ════════════════════════════════
+// --- COLORS ---
+const THEME = {
+    bg: '#040b16',
+    primary: '#fff',
+    accent: '#0ea5e9',
+    muted: '#94a3b8',
+    card: '#0f172a'
+};
 
-const MASONRY_ITEMS = [
-    { type: 'text', title: 'My doctor said my iron is low, now what?', tag: 'Lab results' },
-    { type: 'image', source: { uri: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop' } },
-    { type: 'text', title: 'Why do I always feel tired after eating?', tag: 'Symptom check' },
-    { type: 'text', title: 'Is this amount of stress normal?', tag: 'Mental health' },
-    { type: 'text', title: '#1 Medical AI Worldwide', tag: 'Global' },
-    { type: 'image', source: { uri: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600&auto=format&fit=crop' } },
-    { type: 'text', title: 'My doctor said my iron is low, now what?', tag: 'Lab results' },
-    { type: 'text', title: 'Why do I always feel tired after eating?', tag: 'Symptom check' },
-    { type: 'text', title: 'Is this amount of stress normal?', tag: 'Mental health' },
-    { type: 'text', title: '#1 Medical AI Worldwide', tag: 'Global' },
+const GOALS = [
+    'Feel Less Lonely',
+    'Have Fun',
+    'Chat About Random Stuff',
+    'Talk Shame-Free',
+    'Play Chat Games',
+    'Make a Virtual Friend',
+    'Role Play',
+    'Share Emotion',
+    'Other'
 ];
 
-function ScrollingMasonry() {
-    const translateY = useSharedValue(0);
+// --- CUSTOM SLIDER ---
+const CustomSlider = ({ labelLeft, labelRight, value, onValueChange }) => {
+    const sliderDimRef = useRef(0);
+    const valueRef = useRef(value);
+    const startValue = useRef(0);
+    const onValueChangeRef = useRef(onValueChange);
+    const trackRef = useRef(null);
 
     useEffect(() => {
-        translateY.value = withRepeat(
-            withTiming(-400, { duration: 15000, easing: Easing.linear }),
-            -1,
-            false
-        );
-    }, []);
+        valueRef.current = value;
+    }, [value]);
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateY: translateY.value }]
-        };
-    });
+    useEffect(() => {
+        onValueChangeRef.current = onValueChange;
+    }, [onValueChange]);
 
-    const leftCol = MASONRY_ITEMS.filter((_, i) => i % 2 === 0);
-    const rightCol = MASONRY_ITEMS.filter((_, i) => i % 2 !== 0);
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponderCapture: () => true,
+            onMoveShouldSetPanResponderCapture: () => true,
+            onPanResponderTerminationRequest: () => false,
+            onPanResponderGrant: (evt) => {
+                startValue.current = valueRef.current;
+                // Support tap-to-set: position thumb where user taps
+                if (sliderDimRef.current > 0 && trackRef.current) {
+                    trackRef.current.measure((x, y, w, h, pageX, pageY) => {
+                        if (w > 0) {
+                            const touchX = evt.nativeEvent.pageX - pageX;
+                            let newValue = touchX / w;
+                            if (newValue < 0) newValue = 0;
+                            if (newValue > 1) newValue = 1;
+                            startValue.current = newValue;
+                            valueRef.current = newValue;
+                            onValueChangeRef.current(newValue);
+                        }
+                    });
+                }
+            },
+            onPanResponderMove: (evt, gestureState) => {
+                if (sliderDimRef.current === 0) return;
+                const deltaValue = gestureState.dx / sliderDimRef.current;
+                let newValue = startValue.current + deltaValue;
+                if (newValue < 0) newValue = 0;
+                if (newValue > 1) newValue = 1;
+                onValueChangeRef.current(newValue);
+            },
+        })
+    ).current;
 
-    const renderCard = (item, idx) => {
-        if (item.type === 'text') {
-            return (
-                <View key={idx} style={styles.masonryCard}>
-                    {item.tag && (
-                        <View style={styles.masonryTag}>
-                            <Text style={styles.masonryTagText}>{item.tag}</Text>
-                        </View>
-                    )}
-                    <Text style={styles.masonryTitle}>{item.title}</Text>
-                </View>
-            );
-        }
-        return (
-            <Image key={idx} source={item.source} style={styles.masonryImage} />
-        );
+    const handleLayout = (e) => {
+        sliderDimRef.current = e.nativeEvent.layout.width;
     };
 
     return (
-        <View style={styles.masonryWrapper}>
-            <Animated.View style={[styles.masonryColumns, animatedStyle]}>
-                <View style={styles.masonryCol}>
-                    {leftCol.map(renderCard)}
-                </View>
-                <View style={[styles.masonryCol, { marginTop: 40 }]}>
-                    {rightCol.map(renderCard)}
-                </View>
-            </Animated.View>
-            <LinearGradient
-                colors={['transparent', '#FCFBF8']}
-                style={styles.masonryGradientBottom}
-                pointerEvents="none"
-            />
-        </View>
-    );
-}
-
-function SlideWelcome() {
-    return (
-        <View style={[styles.slideContent, { justifyContent: 'flex-end', paddingTop: 0 }]}>
-            <View style={styles.masonryAbsolute}>
-                <ScrollingMasonry />
+        <View style={styles.sliderContainer}>
+            <View style={styles.sliderLabels}>
+                <Text style={styles.sliderLabel}>{labelLeft}</Text>
+                <Text style={styles.sliderLabel}>{labelRight}</Text>
             </View>
-            <View style={styles.welcomeTextOverlay}>
-                <Animated.Text entering={FadeInDown.delay(200)} style={[styles.superText, { color: Colors.textMuted }]}>
-                    #1 Medical AI Worldwide
-                </Animated.Text>
-                <Animated.Text entering={FadeInUp.delay(500)} style={styles.slideTitle}>
-                    MedGPT, a health companion that actually knows you
-                </Animated.Text>
-                <Animated.Text entering={FadeInUp.delay(700)} style={styles.slideSubtext}>
-                    Healthcare that finally puts you first. Personal. Accurate. Available when you need it.
-                </Animated.Text>
+            <View 
+                ref={trackRef}
+                style={styles.sliderTrackHitArea} 
+                onLayout={handleLayout}
+                {...panResponder.panHandlers}
+            >
+                <View style={styles.sliderTrack}>
+                    <View style={[styles.sliderFill, { width: `${value * 100}%` }]} />
+                </View>
+                <View style={[styles.sliderThumb, { left: `${value * 100}%` }]} />
             </View>
         </View>
-    );
-}
-
-const FloatingBubble = ({ text, top, left, right, delay = 0 }) => {
-    return (
-        <Animated.View
-            entering={FadeInDown.delay(delay).springify().damping(12)}
-            style={{
-                position: 'absolute',
-                top,
-                left,
-                right,
-                backgroundColor: 'rgba(255, 255, 255, 0.85)', // translucent
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                borderRadius: 24,
-                ...Shadows.soft,
-            }}
-        >
-            <Text style={{ fontSize: 13, color: Colors.primary, fontWeight: '500' }}>{text}</Text>
-        </Animated.View>
     );
 };
 
-function SlideClarity() {
-    return (
-        <View style={[styles.slideContent, { justifyContent: 'flex-end', paddingTop: 0 }]}>
-            <View style={styles.masonryAbsolute}>
-                <Image source={{ uri: 'https://images.unsplash.com/photo-1573497620053-ea5300f94f21?q=80&w=800&auto=format&fit=crop' }} style={{ width: '100%', height: '100%', resizeMode: 'cover', opacity: 0.8 }} />
-                <LinearGradient
-                    colors={['transparent', '#FCFBF8']}
-                    style={styles.masonryGradientBottom}
-                    pointerEvents="none"
-                />
-                <FloatingBubble text="No fracture, mild inflammation" top="20%" right={20} delay={300} />
-                <FloatingBubble text="Dyslipidemia = high cholesterol" top="45%" left={10} delay={600} />
-                <FloatingBubble text="WBC count looks healthy" top="70%" right={10} delay={900} />
-            </View>
-            <View style={styles.welcomeTextOverlay}>
-                <Animated.View entering={FadeInDown.delay(200)} style={styles.pillBadge}>
-                    <Ionicons name="bulb-outline" size={16} color={Colors.accent} />
-                    <Text style={styles.pillBadgeText}>CLARITY</Text>
-                </Animated.View>
-                <Animated.Text entering={FadeInDown.delay(400)} style={styles.slideTitle}>
-                    I speak doctor.{'\n'}Without the jargon.
-                </Animated.Text>
-                <Animated.Text entering={FadeInDown.delay(500)} style={styles.slideSubtext}>
-                    Lab results, prescriptions, imaging reports - send them over. I'll explain what matters and keep it all simple and easy to find.
-                </Animated.Text>
-            </View>
-        </View>
-    );
-}
+// --- SLIDES ---
 
-function SlideAvailability() {
+// Slide 1: Introduce Yourself
+function SlideName({ userName, setUserName }) {
     return (
-        <View style={[styles.slideContent, { justifyContent: 'flex-end', paddingTop: 0 }]}>
-            <View style={styles.masonryAbsolute}>
-                <Image source={{ uri: 'https://images.unsplash.com/photo-1516841273335-e39b37888115?q=80&w=800&auto=format&fit=crop' }} style={{ width: '100%', height: '100%', resizeMode: 'cover', opacity: 0.6 }} />
-                <LinearGradient
-                    colors={['transparent', '#FCFBF8']}
-                    style={styles.masonryGradientBottom}
-                    pointerEvents="none"
-                />
-                <FloatingBubble text="Is it normal to feel this tired?" top="25%" left={20} delay={300} />
-                <FloatingBubble text="Can I take this with food?" top="50%" right={20} delay={600} />
-                <FloatingBubble text="My head is throbbing..." top="75%" left={30} delay={900} />
-            </View>
-            <View style={styles.welcomeTextOverlay}>
-                <Animated.View entering={FadeInDown.delay(200)} style={[styles.pillBadge, { borderColor: '#E5A4B1' }]}>
-                    <Ionicons name="heart-outline" size={16} color="#E5A4B1" />
-                    <Text style={[styles.pillBadgeText, { color: '#E5A4B1' }]}>ALWAYS HERE</Text>
-                </Animated.View>
-                <Animated.Text entering={FadeInDown.delay(400)} style={styles.slideTitle}>
-                    No rush.{'\n'}I'll be here.
-                </Animated.Text>
-                <Animated.Text entering={FadeInDown.delay(500)} style={styles.slideSubtext}>
-                    Ask me a question at 2am. Come back after months of silence. There's no wrong time for this, and I'm not going anywhere.
-                </Animated.Text>
-            </View>
-        </View>
-    );
-}
-
-function SlideProfile({ name, setName, age, setAge, sex, setSex }) {
-    return (
-        <View style={styles.slideContent}>
-            <Animated.View entering={FadeInDown.delay(200)} style={styles.pillBadge}>
-                <Ionicons name="person-outline" size={16} color={Colors.accent} />
-                <Text style={styles.pillBadgeText}>PROFILE</Text>
-            </Animated.View>
-            <Animated.Text entering={FadeInDown.delay(300)} style={styles.slideTitle}>
-                Tell me about yourself
+        <View style={styles.slideCenter}>
+            <Animated.Text entering={FadeInDown.delay(200)} style={styles.title}>
+                So nice to meet you!
             </Animated.Text>
-            <Animated.Text entering={FadeInDown.delay(400)} style={styles.slideSubtext}>
-                This helps me provide more accurate and personalized medical advice.
-            </Animated.Text>
-
-            <Animated.View entering={FadeInDown.delay(500)} style={{ width: '100%', gap: 16, marginTop: 24 }}>
+            <Animated.View entering={FadeInDown.delay(400)} style={{ width: '100%', marginTop: 100 }}>
+                <Text style={styles.inputLabel}>Introduce yourself to AI</Text>
                 <View style={styles.inputWrap}>
-                    <Ionicons name="person-circle-outline" size={20} color={Colors.textMuted} style={styles.inputIcon} />
-                    <TextInput style={styles.input} placeholder="Your Name" placeholderTextColor={Colors.textMuted} value={name} onChangeText={setName} />
-                </View>
-                <View style={styles.inputWrap}>
-                    <Ionicons name="calendar-outline" size={20} color={Colors.textMuted} style={styles.inputIcon} />
-                    <TextInput style={styles.input} placeholder="Age" placeholderTextColor={Colors.textMuted} value={age} onChangeText={setAge} keyboardType="numeric" maxLength={3} />
-                </View>
-
-                <Text style={{ fontSize: 13, color: Colors.textMuted, fontWeight: '600', marginTop: 8 }}>BIOLOGICAL SEX</Text>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                    <TouchableOpacity style={[styles.sexPill, sex === 'Male' && styles.sexPillSelected]} onPress={() => setSex('Male')}>
-                        <Text style={[styles.sexPillText, sex === 'Male' && styles.sexPillTextSelected]}>Male</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.sexPill, sex === 'Female' && styles.sexPillSelected]} onPress={() => setSex('Female')}>
-                        <Text style={[styles.sexPillText, sex === 'Female' && styles.sexPillTextSelected]}>Female</Text>
-                    </TouchableOpacity>
+                    <TextInput 
+                        style={styles.input} 
+                        placeholder="Your name" 
+                        placeholderTextColor={THEME.muted} 
+                        value={userName} 
+                        onChangeText={setUserName} 
+                        autoFocus
+                    />
                 </View>
             </Animated.View>
         </View>
     );
 }
 
-function SlideHealth({ diseases, setDiseases }) {
-    const DISEASES = [
-        'PCOS', 'Infertility', 'Early Puberty', 'Breast Cancer',
-        'Birth Defects', 'Thyroid Issues', 'Eczema / Psoriasis', 'Hormonal Acne',
-    ];
-
-    const [customInput, setCustomInput] = useState('');
-    const [isAddingCustom, setIsAddingCustom] = useState(false);
-
-    const toggleArrayItem = (item) => {
-        setDiseases(prev => {
-            if (item === 'None') return [];
-            const fresh = prev.filter(p => p !== 'None');
-            if (fresh.includes(item)) return fresh.filter(i => i !== item);
-            return [...fresh, item];
-        });
-    };
-
-    const handleAddCustom = () => {
-        const trimmed = customInput.trim();
-        if (trimmed && !diseases.includes(trimmed)) {
-            setDiseases(prev => [...prev.filter(p => p !== 'None'), trimmed]);
-        }
-        setCustomInput('');
-        setIsAddingCustom(false);
-    };
-
+// Slide 2: Choose Your Girl
+function SlideChooseAvatar({ personas, loading, selectedAvatar, setSelectedAvatar }) {
     return (
-        <View style={styles.slideContent}>
-            <Animated.View entering={FadeInDown.delay(200)} style={[styles.pillBadge, { borderColor: '#ef4444' }]}>
-                <Ionicons name="medical-outline" size={16} color="#ef4444" />
-                <Text style={[styles.pillBadgeText, { color: '#ef4444' }]}>HEALTH</Text>
-            </Animated.View>
-            <Animated.Text entering={FadeInDown.delay(300)} style={styles.slideTitle}>
-                Any health concerns?
+        <View style={styles.slideFull}>
+            <Animated.Text entering={FadeInDown} style={styles.titleAbsolute}>
+                Choose your Girl
             </Animated.Text>
-            <Animated.Text entering={FadeInDown.delay(400)} style={styles.slideSubtext}>
-                Select any conditions you want the AI to watch out for when analyzing your results.
-            </Animated.Text>
+            
+            <View style={styles.carouselContainer}>
+                {loading ? (
+                    <ActivityIndicator size="large" color={THEME.primary} />
+                ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, alignItems: 'center', gap: 16 }}>
+                        {personas.map((avatar) => {
+                            const isSelected = selectedAvatar?.id === avatar.id;
+                            return (
+                                <TouchableOpacity 
+                                    key={avatar.id} 
+                                    onPress={() => setSelectedAvatar(avatar)}
+                                    style={[styles.avatarThumbWrap, isSelected && styles.avatarThumbSelected]}
+                                >
+                                    <Image source={{ uri: avatar.image_url }} style={styles.avatarThumb} />
+                                </TouchableOpacity>
+                            );
+                        })}
+                        {/* Custom Option */}
+                        <TouchableOpacity 
+                            onPress={() => setSelectedAvatar({ id: 'custom', image_url: personas[0]?.image_url, name: 'Custom' })}
+                            style={[styles.avatarThumbWrap, selectedAvatar?.id === 'custom' && styles.avatarThumbSelected, { backgroundColor: THEME.card, justifyContent: 'center', alignItems: 'center' }]}
+                        >
+                            <Ionicons name="add" size={28} color="#fff" />
+                            <View style={styles.proBadge}><Ionicons name="star" size={10} color="#fff"/></View>
+                            <Text style={{color: '#fff', fontSize: 10, position: 'absolute', bottom: 4}}>Custom</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+                )}
+            </View>
+        </View>
+    );
+}
 
-            <Animated.View entering={FadeInDown.delay(500)} style={{ width: '100%', flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 24 }}>
-                {DISEASES.map(d => (
-                    <TouchableOpacity key={d} style={[styles.miniPill, diseases.includes(d) && styles.miniPillSelected]} onPress={() => toggleArrayItem(d)}>
-                        <Text style={[styles.miniPillText, diseases.includes(d) && styles.miniPillTextSelected]}>{d}</Text>
-                    </TouchableOpacity>
-                ))}
-                {/* Show user-added custom conditions */}
-                {diseases.filter(d => !DISEASES.includes(d) && d !== 'None').map(custom => (
-                    <TouchableOpacity key={custom} style={[styles.miniPill, styles.miniPillSelected]} onPress={() => toggleArrayItem(custom)}>
-                        <Text style={[styles.miniPillText, styles.miniPillTextSelected]}>{custom}</Text>
-                    </TouchableOpacity>
-                ))}
-                {/* Add custom input pill */}
-                {isAddingCustom ? (
-                    <View style={[styles.miniPill, { borderColor: Colors.accent, borderStyle: 'solid', minWidth: 120 }]}>
-                        <TextInput
-                            style={{ fontSize: 14, fontWeight: '600', color: Colors.primary, flex: 1, paddingVertical: 0 }}
-                            autoFocus
-                            placeholder="Type here..."
-                            placeholderTextColor={Colors.textMuted}
-                            value={customInput}
-                            onChangeText={setCustomInput}
-                            onSubmitEditing={handleAddCustom}
-                            onBlur={() => { setIsAddingCustom(false); setCustomInput(''); }}
-                            returnKeyType="done"
+// Slide 3: Tweak Personality (Custom Only)
+function SlidePersonality({ traits, setTraits, extraDemand, setExtraDemand, selectedAvatar, setSelectedAvatar, personas }) {
+    return (
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.slideFull}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}>
+                <Animated.Text entering={FadeInDown} style={styles.titleAbsolute}>
+                    Customize Persona
+                </Animated.Text>
+                
+                <View style={styles.customContainer}>
+                    <Text style={styles.sectionLabel}>Select Image</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, marginBottom: 24 }}>
+                        {personas.map((p) => (
+                            <TouchableOpacity 
+                                key={p.id} 
+                                onPress={() => setSelectedAvatar({ ...selectedAvatar, image_url: p.image_url })}
+                                style={[styles.avatarThumbWrap, selectedAvatar.image_url === p.image_url && styles.avatarThumbSelected]}
+                            >
+                                <Image source={{ uri: p.image_url }} style={styles.avatarThumb} />
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+
+                    <Text style={styles.sectionLabel}>Personality Traits</Text>
+                    <View style={styles.slidersWrapperInline}>
+                        <CustomSlider 
+                            labelLeft="Shy" labelRight="Flirty" 
+                            value={traits.shyFlirty} 
+                            onValueChange={(val) => setTraits({...traits, shyFlirty: val})} 
+                        />
+                        <CustomSlider 
+                            labelLeft="Pessimistic" labelRight="Optimistic" 
+                            value={traits.pessOpt} 
+                            onValueChange={(val) => setTraits({...traits, pessOpt: val})} 
+                        />
+                        <CustomSlider 
+                            labelLeft="Ordinary" labelRight="Mysterious" 
+                            value={traits.ordMyst} 
+                            onValueChange={(val) => setTraits({...traits, ordMyst: val})} 
                         />
                     </View>
-                ) : (
-                    <TouchableOpacity style={[styles.miniPill, { borderColor: Colors.accent, borderStyle: 'dashed' }]} onPress={() => setIsAddingCustom(true)}>
-                        <Ionicons name="add" size={14} color={Colors.accent} />
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.accent, marginLeft: 4 }}>Add</Text>
-                    </TouchableOpacity>
-                )}
-                <TouchableOpacity style={[styles.miniPill, diseases.includes('None') && styles.miniPillSelected]} onPress={() => toggleArrayItem('None')}>
-                    <Text style={[styles.miniPillText, diseases.includes('None') && styles.miniPillTextSelected]}>None of the above</Text>
-                </TouchableOpacity>
-            </Animated.View>
-        </View>
-    );
-}
 
-// ════════════════════════════════
-// AUTHENTICATION & PAYWALL
-// ════════════════════════════════
-function AuthScreen({ onResetOnboarding }) {
-    const [isLogin, setIsLogin] = useState(true);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const insets = useSafeAreaInsets();
-
-    const { signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail } = useAuth();
-    const { setOnboarded, setGuestMode } = useStore();
-
-    const handleAuthSuccess = (method, isNewUser = false) => {
-        if (isNewUser) {
-            posthog.capture('user signed up', { signup_method: method });
-        } else {
-            posthog.capture('user logged in', { login_method: method });
-        }
-    };
-
-    const handleGoogleSignIn = async () => {
-        if (loading) return;
-        setLoading(true);
-        posthog.capture('signup_attempted', { method: 'google' });
-        try {
-            setError('');
-            const data = await signInWithGoogle();
-            if (data?.session || data?.user) {
-                const isNewUser = new Date(data.user?.created_at).getTime() > Date.now() - 60000;
-                handleAuthSuccess('google', isNewUser);
-            }
-        } catch (err) {
-            const errorMsg = err.message?.includes('provider') ? 'Google sign-in is not enabled yet.' : err.message;
-            posthog.capture('auth failed', { method: 'google', reason: errorMsg, error_code: err?.code });
-            posthog.capture('signup_failed', { method: 'google', error_code: err?.code, error_message: errorMsg });
-            setError(errorMsg);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleAppleSignIn = async () => {
-        if (loading) return;
-        setLoading(true);
-        posthog.capture('signup_attempted', { method: 'apple' });
-        try {
-            setError('');
-            const data = await signInWithApple();
-            if (data?.session || data?.user) {
-                const isNewUser = new Date(data.user?.created_at).getTime() > Date.now() - 60000;
-                handleAuthSuccess('apple', isNewUser);
-            }
-        } catch (err) {
-            posthog.capture('auth failed', { method: 'apple', reason: err.message, error_code: err?.code });
-            posthog.capture('signup_failed', { method: 'apple', error_code: err?.code, error_message: err.message });
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleEmailAuth = async () => {
-        const trimmedEmail = email.trim();
-        if (!trimmedEmail || !password) {
-            setError('Please enter both email and password.');
-            return;
-        }
-
-        setError('');
-        setLoading(true);
-        posthog.capture(isLogin ? 'login_attempted' : 'signup_attempted', { method: 'email' });
-
-        try {
-            if (isLogin) {
-                const data = await signInWithEmail(trimmedEmail, password);
-                if (data?.session || data?.user) {
-                    handleAuthSuccess('email', false);
-                }
-            } else {
-                const data = await signUpWithEmail(trimmedEmail, password);
-                if (data?.session) {
-                    handleAuthSuccess('email', true);
-                } else if (data?.user) {
-                    setError('Account created! Please check your email to verify.');
-                }
-            }
-        } catch (err) {
-            posthog.capture('auth failed', { method: 'email', is_login: isLogin, reason: err.message, error_code: err?.code });
-            posthog.capture(isLogin ? 'login_failed' : 'signup_failed', { method: 'email', error_code: err?.code, error_message: err.message });
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleGuestSignIn = async () => {
-        await setGuestMode(true);
-        await setOnboarded();
-        posthog.capture('guest_mode_entered');
-    };
-
-    return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.authContainer}>
-            <ScrollView contentContainerStyle={[styles.authScrollContent, { paddingBottom: 40 + insets.bottom }]} keyboardShouldPersistTaps="handled">
-                <Animated.View entering={ZoomIn.springify()} style={styles.authBrand}>
-                    <Image source={require('../../assets/appinside1.png')} style={{ width: 140, height: 140, borderRadius: 24, marginBottom: 16, resizeMode: 'contain' }} />
-                    <Text style={styles.authBrandText}>Med<Text style={styles.authAccent}>GPT</Text></Text>
-                </Animated.View>
-                <Animated.Text entering={FadeInDown.delay(100)} style={styles.authSubtitle}>{isLogin ? 'Welcome back' : 'Create your account'}</Animated.Text>
-
-                <Animated.View entering={FadeInDown.delay(200)}>
-                    <TouchableOpacity onPress={handleGoogleSignIn} style={styles.googleBtn} activeOpacity={0.8}>
-                        <Ionicons name="logo-google" size={20} color="#4285F4" />
-                        <Text style={styles.googleBtnText}>Continue with Google</Text>
-                    </TouchableOpacity>
-
-                    {Platform.OS === 'ios' && (
-                        <AppleAuthentication.AppleAuthenticationButton
-                            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-                            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                            cornerRadius={Radii.button}
-                            style={styles.appleBtn}
-                            onPress={handleAppleSignIn}
-                        />
-                    )}
-
-                    <TouchableOpacity onPress={handleGuestSignIn} style={[styles.googleBtn, { marginTop: Platform.OS === 'ios' ? 0 : 0 }]} activeOpacity={0.8}>
-                        <Ionicons name="person-outline" size={20} color={Colors.primary} />
-                        <Text style={styles.googleBtnText}>Continue as Guest</Text>
-                    </TouchableOpacity>
-                </Animated.View>
-
-                <Animated.View entering={FadeIn.delay(300)} style={styles.divider}>
-                    <View style={styles.dividerLine} /><Text style={styles.dividerText}>or</Text><View style={styles.dividerLine} />
-                </Animated.View>
-                <Animated.View entering={FadeInDown.delay(350)} style={styles.inputWrap}>
-                    <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-                    <TextInput value={email} onChangeText={setEmail} placeholder="Email address" placeholderTextColor={Colors.textMuted} keyboardType="email-address" autoCapitalize="none" style={styles.input} />
-                </Animated.View>
-                <Animated.View entering={FadeInDown.delay(400)} style={styles.inputWrap}>
-                    <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-                    <TextInput value={password} onChangeText={setPassword} placeholder="Password" placeholderTextColor={Colors.textMuted} secureTextEntry={!showPassword} style={styles.input} />
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4, marginLeft: 'auto' }}>
-                        <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={Colors.textMuted} />
-                    </TouchableOpacity>
-                </Animated.View>
-                {error ? <Animated.Text entering={FadeIn} style={styles.errorText}>{error}</Animated.Text> : null}
-                <Animated.View entering={FadeInDown.delay(450)}>
-                    <TouchableOpacity onPress={handleEmailAuth} style={[styles.primaryBtn, loading && { opacity: 0.5 }]} disabled={loading} activeOpacity={0.8}>
-                        <Text style={styles.primaryBtnText}>{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}</Text>
-                    </TouchableOpacity>
-                </Animated.View>
-                <Animated.View entering={FadeIn.delay(500)} style={styles.toggleRow}>
-                    <Text style={styles.toggleText}>{isLogin ? "Don't have an account? " : 'Already have an account? '}</Text>
-                    <TouchableOpacity onPress={() => { setIsLogin(!isLogin); setError(''); }}><Text style={styles.toggleLink}>{isLogin ? 'Sign Up' : 'Sign In'}</Text></TouchableOpacity>
-                </Animated.View>
+                    <Text style={styles.sectionLabel}>Extra Details</Text>
+                    <TextInput 
+                        style={styles.textArea} 
+                        placeholder="Any extra personality demands..." 
+                        placeholderTextColor="rgba(255,255,255,0.5)"
+                        multiline
+                        numberOfLines={3}
+                        value={extraDemand} 
+                        onChangeText={setExtraDemand} 
+                    />
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 }
 
-const RATING_CARDS = [
-    { text: "It read my complex lab reports and explained everything in simple terms. A complete lifesaver!" },
-    { text: "Love having a health companion available 24/7 that answers all my concerns without any judgment." },
-    { text: "Gives highly accurate answers and breaks down doctor jargon clearly. Highly recommend!" },
-];
-
-function SlideAppreciation({ onRatingGiven }) {
-    const [rating, setRating] = useState(0);
-    const [hasRated, setHasRated] = useState(false);
-
-    const handleStarPress = (stars) => {
-        if (hasRated) return; // Prevent multiple clicks
-        setRating(stars);
-        setHasRated(true);
-        posthog.capture('onboarding_rating_given', { stars });
-        if (onRatingGiven) {
-            onRatingGiven(stars);
-        }
-    };
-
+// Slide 4: Set Girl Name (Custom Only)
+function SlideGirlName({ girlName, setGirlName, selectedAvatar }) {
     return (
-        <View style={styles.slideContent}>
-            <Animated.Image
-                entering={FadeInDown.delay(100)}
-                source={require('../../assets/rating_header_banner.png')}
-                style={styles.ratingBanner}
-            />
-
-            <Animated.View entering={FadeInDown.delay(200)} style={styles.ratingMissionBadge}>
-                <Ionicons name="heart" size={14} color="#ef4444" />
-                <Text style={styles.ratingMissionText}>OUR MISSION</Text>
-            </Animated.View>
-
-            <Animated.Text entering={FadeInDown.delay(300)} style={[styles.slideTitle, { textAlign: 'center', marginBottom: verticalScale(12) }]}>
-                Built for you,{'\n'}with care
-            </Animated.Text>
-
-            <Animated.Text entering={FadeInDown.delay(400)} style={[styles.slideSubtext, { textAlign: 'center', marginBottom: 20 }]}>
-                Our team puts immense effort into making MedGPT truly useful. We are working hard to build a health companion that genuinely cares about your well-being. <Text style={{ fontWeight: '700' }}>Your privacy and security matter to us.</Text>
-            </Animated.Text>
-
-            {/* Interactive Stars */}
-            <Animated.Text entering={FadeInDown.delay(450)} style={{ fontSize: 13, fontWeight: '800', color: Colors.primary, marginBottom: 4, letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                Tap 5 stars to continue ❤️
+        <View style={styles.slideFull}>
+            <Animated.Text entering={FadeInDown} style={styles.titleAbsolute}>
+                Set Girl Name
             </Animated.Text>
             
-            <Animated.View entering={ZoomIn.delay(500).springify()} style={styles.ratingStarsRow}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                    <TouchableOpacity
-                        key={star}
-                        onPress={() => !hasRated && handleStarPress(star)}
-                        activeOpacity={0.7}
-                        style={styles.ratingStarBtn}
-                    >
-                        <Ionicons
-                            name={star <= rating ? 'star' : 'star-outline'}
-                            size={38}
-                            color={star <= rating ? '#F5A623' : '#d1d5db'}
-                        />
-                    </TouchableOpacity>
-                ))}
-            </Animated.View>
-
-            {hasRated && (
-                <Animated.Text entering={FadeIn.duration(300)} style={styles.ratingThankYou}>
-                    {rating === 5 ? "You're amazing! Thank you! 🎉" : 'Thank you for your feedback! ❤️'}
-                </Animated.Text>
-            )}
-
-            {/* Slim Social Proof Cards */}
-            <Animated.View entering={FadeInDown.delay(600)} style={styles.ratingReviewsWrap}>
-                {RATING_CARDS.map((card, idx) => (
-                    <View key={idx} style={styles.ratingReviewCard}>
-                        <View style={styles.ratingReviewStarsRow}>
-                            {[1, 2, 3, 4, 5].map(s => (
-                                <Ionicons key={s} name="star" size={11} color="#F5A623" style={{ marginRight: 2 }} />
-                            ))}
-                        </View>
-                        <Text style={styles.ratingReviewText} numberOfLines={2}>{card.text}</Text>
-                    </View>
-                ))}
-            </Animated.View>
+            <View style={styles.girlNameWrapper}>
+                <TextInput 
+                    style={styles.transparentInput} 
+                    placeholder="Enter name..." 
+                    placeholderTextColor="rgba(255,255,255,0.5)" 
+                    value={girlName} 
+                    onChangeText={setGirlName} 
+                    autoFocus
+                />
+            </View>
         </View>
     );
 }
 
-// ════════════════════════════════
-// NEW AI TERMS SLIDE
-// ════════════════════════════════
-function SlideAITerms({ acceptedTerms, setAcceptedTerms }) {
-    return (
-        <View style={styles.slideContent}>
-            <Animated.View entering={ZoomIn.duration(400).springify()} style={[styles.pillBadge, { borderColor: '#10B981', backgroundColor: '#F0FDF4', marginBottom: 16 }]}>
-                <Ionicons name="checkmark-circle" size={18} color="#10B981" />
-                <Text style={[styles.pillBadgeText, { color: '#10B981' }]}>READY TO GO</Text>
-            </Animated.View>
-
-            <Animated.Text entering={FadeInDown.delay(200)} style={[styles.slideTitle, { textAlign: 'center', marginBottom: 12 }]}>
-                Your personalized health assistant is ready
-            </Animated.Text>
-            <Animated.Text entering={FadeInDown.delay(300)} style={[styles.slideSubtext, { textAlign: 'center', marginBottom: 32 }]}>
-                Based on your health profile and goals
-            </Animated.Text>
-
-            <Animated.View entering={FadeInDown.delay(400)} style={{ width: '100%', gap: 16, marginBottom: 32 }}>
-                <View style={styles.featureCard}>
-                    <View style={styles.featureIconWrap}>
-                        <Ionicons name="time" size={24} color={Colors.accent} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.featureCardTitle}>24/7 Availability</Text>
-                        <Text style={styles.featureCardDesc}>Your health assistant is always here.</Text>
-                    </View>
-                </View>
-
-                <View style={styles.featureCard}>
-                    <View style={[styles.featureIconWrap, { backgroundColor: '#FEF3C7' }]}>
-                        <Ionicons name="flash" size={24} color="#F5A623" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.featureCardTitle}>Instant Analysis</Text>
-                        <Text style={styles.featureCardDesc}>Fast and accurate insights from your medical reports.</Text>
-                    </View>
-                </View>
-
-                <View style={styles.featureCard}>
-                    <View style={[styles.featureIconWrap, { backgroundColor: '#ECFDF5' }]}>
-                        <Ionicons name="shield-checkmark" size={24} color="#10B981" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.featureCardTitle}>Privacy First</Text>
-                        <Text style={styles.featureCardDesc}>Your data is secure and never stored.</Text>
-                    </View>
-                </View>
-            </Animated.View>
-
-            <Animated.View entering={FadeInUp.delay(500)} style={styles.termsBox}>
-                <TouchableOpacity onPress={() => setAcceptedTerms(!acceptedTerms)} style={styles.termsCheckRow} activeOpacity={0.8}>
-                    <View style={{ paddingTop: 2 }}>
-                        <Ionicons 
-                            name={acceptedTerms ? 'checkmark-circle' : 'ellipse-outline'} 
-                            size={24} 
-                            color={acceptedTerms ? Colors.accent : Colors.textMuted} 
-                        />
-                    </View>
-                    <Text style={styles.termsText}>
-                        I agree that MedGPT uses third-party AI services (like Google Models and Groq Models) to analyze my health data and provide insights. Data is{' '}
-                        <Text style={styles.termsHighlight}>deleted after analysis</Text>
-                        {' '}and not stored. By continuing, I agree to share chat messages and scanned reports with these providers.
-                    </Text>
-                </TouchableOpacity>
-            </Animated.View>
-        </View>
-    );
-}
-
-// ════════════════════════════════
-// ROOT ONBOARDING CONTAINER
-// ════════════════════════════════
-export default function OnboardingScreen() {
-    const guestRequiresAuth = useStore(state => state.guestRequiresAuth);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [showAuth, setShowAuth] = useState(guestRequiresAuth);
-    const [hasShownReview, setHasShownReview] = useState(false);
-    const insets = useSafeAreaInsets();
-
-    // Profiles
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
-    const [sex, setSex] = useState('');
-
-    // Health Prefs
-    const [diseases, setDiseases] = useState([]);
-
-    // AI Terms
-    const [acceptedAITerms, setAcceptedAITerms] = useState(false);
-
-    const totalSlides = Platform.OS === 'ios' ? 7 : 6;
-
-    const handleBack = () => {
-        if (currentSlide > 0) {
-            setCurrentSlide(prev => prev - 1);
+// Slide 5: Select Your Goals
+function SlideGoals({ selectedGoals, setSelectedGoals }) {
+    const toggleGoal = (goal) => {
+        if (selectedGoals.includes(goal)) {
+            setSelectedGoals(selectedGoals.filter(g => g !== goal));
+        } else {
+            setSelectedGoals([...selectedGoals, goal]);
         }
     };
 
-    const finishOnboarding = async () => {
-        const payload = {
-            name: name.trim(),
-            age: age.trim(),
-            sex,
-            diseases
+    return (
+        <ScrollView contentContainerStyle={styles.slideScrollCenter}>
+            <Animated.Text entering={FadeInDown} style={styles.title}>
+                Select Your Goals
+            </Animated.Text>
+            <Animated.Text entering={FadeInDown.delay(100)} style={styles.subtitle}>
+                Please tell us what you're looking for in your relationship. It'll help us personalize your experience.
+            </Animated.Text>
+
+            <View style={styles.goalsContainer}>
+                {GOALS.map((goal, idx) => {
+                    const isSelected = selectedGoals.includes(goal);
+                    return (
+                        <Animated.View key={goal} entering={FadeInUp.delay(150 + idx * 50)}>
+                            <TouchableOpacity 
+                                onPress={() => toggleGoal(goal)}
+                                style={[styles.goalPill, isSelected && styles.goalPillSelected]}
+                            >
+                                <Text style={[styles.goalText, isSelected && styles.goalTextSelected]}>
+                                    {goal}
+                                </Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    );
+                })}
+            </View>
+        </ScrollView>
+    );
+}
+
+// Slide 6: Creating Avatar
+function SlideCreating({ selectedAvatar, onComplete }) {
+    const progress = useSharedValue(0);
+    const [step, setStep] = useState(0);
+
+    useEffect(() => {
+        progress.value = withTiming(1, { duration: 3000, easing: Easing.linear });
+        
+        setTimeout(() => setStep(1), 1000);
+        setTimeout(() => setStep(2), 2000);
+        setTimeout(() => {
+            setStep(3);
+            onComplete();
+        }, 3200);
+    }, []);
+
+    const ProgressCheck = ({ label, active }) => (
+        <View style={styles.progressRow}>
+            <View style={[styles.progressCircle, active && styles.progressCircleActive]}>
+                {active && <Ionicons name="checkmark" size={16} color={THEME.bg} />}
+            </View>
+            <Text style={[styles.progressLabel, active && styles.progressLabelActive]}>{label}</Text>
+        </View>
+    );
+
+    return (
+        <View style={styles.slideFull}>
+            <View style={styles.darkOverlay} />
+
+            <View style={styles.creatingCenter}>
+                <Text style={styles.creatingTitle}>Creating avatar</Text>
+                
+                <View style={styles.spinnerWrap}>
+                    <View style={styles.spinnerRing} />
+                    <Text style={styles.spinnerText}>100%</Text>
+                </View>
+
+                <View style={styles.progressList}>
+                    <ProgressCheck label="Analyzing your information" active={step >= 1} />
+                    <ProgressCheck label="Gathering Content" active={step >= 2} />
+                    <ProgressCheck label="Creating Avatar" active={step >= 3} />
+                </View>
+            </View>
+        </View>
+    );
+}
+
+// --- AUTH SCREEN ---
+function AuthScreen({ onResetOnboarding }) {
+    const insets = useSafeAreaInsets();
+    const { setOnboarded, setGuestMode } = useStore();
+    const [loading, setLoading] = useState(false);
+
+    const handleGuestSignIn = async () => {
+        setLoading(true);
+        await setGuestMode(true);
+        await setOnboarded();
+        posthog.capture('guest_mode_entered_ai_girl');
+        setLoading(false);
+    };
+
+    return (
+        <View style={[styles.container, { justifyContent: 'center', paddingHorizontal: 24 }]}>
+            <Animated.View entering={ZoomIn}>
+                <Text style={styles.title}>You're all set!</Text>
+                <Text style={styles.subtitle}>Let's save your profile to start chatting.</Text>
+            </Animated.View>
+
+            <TouchableOpacity 
+                onPress={handleGuestSignIn} 
+                style={[styles.primaryBtn, { marginTop: 40 }]} 
+                disabled={loading}
+            >
+                <Text style={styles.primaryBtnText}>{loading ? 'Loading...' : 'Continue as Guest'}</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
+
+// --- MAIN ONBOARDING ---
+export default function OnboardingScreen() {
+    const insets = useSafeAreaInsets();
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [showAuth, setShowAuth] = useState(false);
+
+    // Fetch personas
+    const [personas, setPersonas] = useState([]);
+    const [loadingPersonas, setLoadingPersonas] = useState(true);
+
+    // Form State
+    const [userName, setUserName] = useState('');
+    const [selectedAvatar, setSelectedAvatar] = useState(null);
+    const [traits, setTraits] = useState({ shyFlirty: 0.5, pessOpt: 0.5, ordMyst: 0.5 });
+    const [extraDemand, setExtraDemand] = useState('');
+    const [girlName, setGirlName] = useState('');
+    const [selectedGoals, setSelectedGoals] = useState([]);
+
+    const totalSlides = 6;
+
+    useEffect(() => {
+        const fetchPersonas = async () => {
+            try {
+                const { data, error } = await supabase.from('ai_personas').select('*').eq('is_visible', true).order('created_at', { ascending: true });
+                if (data && data.length > 0) {
+                    setPersonas(data);
+                    setSelectedAvatar(data[0]);
+                } else {
+                    const fallback = [
+                        { id: 'fb1', name: 'Luna', image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=540&h=960&fit=crop', personality: {shyFlirty: 0.8, pessOpt: 0.6, ordMyst: 0.9}, extra_demand: 'I love talking about the universe and stars.' },
+                        { id: 'fb2', name: 'Emma', image_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=540&h=960&fit=crop', personality: {shyFlirty: 0.4, pessOpt: 0.9, ordMyst: 0.3}, extra_demand: 'I am very practical and optimistic.' },
+                        { id: 'custom_girl', name: 'Custom Girl', image_url: 'https://images.unsplash.com/photo-1525875975471-999f65706a10?w=540&h=960&fit=crop', personality: {shyFlirty: 0.5, pessOpt: 0.5, ordMyst: 0.5}, extra_demand: 'I am a custom AI persona.' }
+                    ];
+                    setPersonas(fallback);
+                    setSelectedAvatar(fallback[0]);
+                }
+            } catch (err) {
+                const fallback = [
+                    { id: 'fb1', name: 'Luna', image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=540&h=960&fit=crop', personality: {shyFlirty: 0.8, pessOpt: 0.6, ordMyst: 0.9}, extra_demand: 'I love talking about the universe and stars.' },
+                    { id: 'fb2', name: 'Emma', image_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=540&h=960&fit=crop', personality: {shyFlirty: 0.4, pessOpt: 0.9, ordMyst: 0.3}, extra_demand: 'I am very practical and optimistic.' },
+                    { id: 'custom_girl', name: 'Custom Girl', image_url: 'https://images.unsplash.com/photo-1525875975471-999f65706a10?w=540&h=960&fit=crop', personality: {shyFlirty: 0.5, pessOpt: 0.5, ordMyst: 0.5}, extra_demand: 'I am a custom AI persona.' }
+                ];
+                setPersonas(fallback);
+                setSelectedAvatar(fallback[0]);
+            }
+            setLoadingPersonas(false);
         };
-        useStore.getState().setHealthPreferences(payload);
-        await useStore.getState().setAcceptedAITerms(true);
-        posthog.capture('onboarding completed', { age, sex, diseases });
+        fetchPersonas();
+    }, []);
+
+    const handleNext = () => {
+        if (currentSlide === 0 && !userName.trim()) return Alert.alert('Oops', 'Please enter your name');
+        
+        if (currentSlide === 1) {
+            if (selectedAvatar?.id !== 'custom') {
+                // If a predefined girl is selected, populate her data and skip custom slides
+                if (selectedAvatar) {
+                    setTraits(typeof selectedAvatar.personality === 'string' ? JSON.parse(selectedAvatar.personality) : selectedAvatar.personality);
+                    setGirlName(selectedAvatar.name);
+                    setExtraDemand(selectedAvatar.extra_demand || '');
+                }
+                setCurrentSlide(4);
+                return;
+            }
+        }
+        
+        if (currentSlide === 3 && !girlName.trim()) return Alert.alert('Oops', 'Please give her a name');
+
+        if (currentSlide < totalSlides - 1) {
+            setCurrentSlide(prev => prev + 1);
+        }
+    };
+
+    const handleBack = () => {
+        if (currentSlide === 4 && selectedAvatar?.id !== 'custom') {
+            setCurrentSlide(1);
+            return;
+        }
+        if (currentSlide > 0) setCurrentSlide(prev => prev - 1);
+    };
+
+    const handleCreationComplete = () => {
+        const finalAvatar = {
+            ...selectedAvatar,
+            name: selectedAvatar?.id === 'custom' ? girlName : selectedAvatar?.name,
+            personality: selectedAvatar?.id === 'custom' ? traits : selectedAvatar?.personality,
+            extra_demand: selectedAvatar?.id === 'custom' ? extraDemand : selectedAvatar?.extra_demand,
+        };
+        
+        useStore.getState().setSelectedPersona(finalAvatar);
+        
+        useStore.setState({
+            companionProfile: {
+                userName,
+                avatar: finalAvatar,
+                traits,
+                extraDemand,
+                girlName,
+                goals: selectedGoals
+            }
+        });
         setShowAuth(true);
     };
 
-    const handleRatingGiven = async (stars) => {
-        if (stars === 5) {
-            try {
-                if (await StoreReview.hasAction()) {
-                    await StoreReview.requestReview();
-                }
-            } catch (error) {
-                console.log(error);
-            }
-            setTimeout(() => {
-                if (Platform.OS === 'ios') setCurrentSlide(6);
-                else finishOnboarding();
-            }, 1500);
-        } else {
-            setTimeout(() => {
-                if (Platform.OS === 'ios') setCurrentSlide(6);
-                else finishOnboarding();
-            }, 1200);
-        }
-    };
-
-    const handleNext = async () => {
-        if (currentSlide < totalSlides - 1) {
-            if (currentSlide === 3) {
-                if (!name.trim() || !age.trim() || !sex) {
-                    Alert.alert('Please complete', 'Please provide your name, age, and sex.');
-                    return;
-                }
-            }
-            setCurrentSlide(prev => prev + 1);
-        } else {
-            if (Platform.OS === 'ios' && currentSlide === 6 && !acceptedAITerms) {
-                Alert.alert('Terms Required', 'Please accept the AI Data Privacy terms to continue.');
-                return;
-            }
-            finishOnboarding();
-        }
-    };
-
     if (showAuth) {
-        return (
-            <AuthScreen
-                onResetOnboarding={async () => {
-                    await useStore.getState().clearOnboarding();
-                    useStore.getState().setGuestRequiresAuth(false);
-                    setShowAuth(false);
-                    setCurrentSlide(0);
-                }}
-            />
-        );
+        return <AuthScreen />;
     }
 
     const renderSlide = () => {
         switch (currentSlide) {
-            case 0: return <SlideWelcome />;
-            case 1: return <SlideClarity />;
-            case 2: return <SlideAvailability />;
-            case 3: return <SlideProfile name={name} setName={setName} age={age} setAge={setAge} sex={sex} setSex={setSex} />;
-            case 4: return <SlideHealth diseases={diseases} setDiseases={setDiseases} />;
-            case 5: return <SlideAppreciation onRatingGiven={handleRatingGiven} />;
-            case 6: return <SlideAITerms acceptedTerms={acceptedAITerms} setAcceptedTerms={setAcceptedAITerms} />;
-            default: return <SlideWelcome />;
+            case 0: return <SlideName userName={userName} setUserName={setUserName} />;
+            case 1: return <SlideChooseAvatar personas={personas} loading={loadingPersonas} selectedAvatar={selectedAvatar} setSelectedAvatar={setSelectedAvatar} />;
+            case 2: return <SlidePersonality personas={personas} traits={traits} setTraits={setTraits} extraDemand={extraDemand} setExtraDemand={setExtraDemand} selectedAvatar={selectedAvatar} setSelectedAvatar={setSelectedAvatar} />;
+            case 3: return <SlideGirlName girlName={girlName} setGirlName={setGirlName} selectedAvatar={selectedAvatar} />;
+            case 4: return <SlideGoals selectedGoals={selectedGoals} setSelectedGoals={setSelectedGoals} />;
+            case 5: return <SlideCreating selectedAvatar={selectedAvatar} onComplete={handleCreationComplete} />;
+            default: return null;
         }
     };
 
+    const isAutoSlide = currentSlide === 5;
+    
+    // Calculate step mapping for header
+    let displayStep = 1;
+    if (currentSlide === 1) displayStep = 2;
+    if (currentSlide === 2) displayStep = 3;
+    if (currentSlide === 3) displayStep = 4;
+    if (currentSlide === 4) displayStep = selectedAvatar?.id !== 'custom' ? 3 : 5;
+
     return (
-        <View style={styles.container}>
-            <View style={styles.skipRow}>
-                <Text style={styles.stepText}>{currentSlide + 1} / {totalSlides}</Text>
-            </View>
-            <ScrollView contentContainerStyle={styles.slideScroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+            {currentSlide === 0 ? (
+                <Image source={require('../../assets/appinside1.png')} style={styles.fullBgImage} />
+            ) : (
+                selectedAvatar && selectedAvatar.image_url && (
+                    <Image source={{ uri: selectedAvatar.image_url }} style={styles.fullBgImage} />
+                )
+            )}
+            
+            <LinearGradient colors={['transparent', 'rgba(4,11,22,0.9)', THEME.bg]} style={styles.globalBottomGradient} />
+            
+            {!isAutoSlide && (
+                <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+                    <TouchableOpacity onPress={handleBack} style={{ padding: 8, opacity: currentSlide === 0 ? 0 : 1 }} disabled={currentSlide === 0}>
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.stepIndicator}>Step {displayStep} / {selectedAvatar?.id !== 'custom' ? 4 : 6}</Text>
+                    <View style={{ width: 40 }} />
+                </View>
+            )}
+
+            <View style={{ flex: 1 }}>
                 {renderSlide()}
-            </ScrollView>
-            <View style={[styles.bottomControls, { paddingBottom: Math.max(insets.bottom, Platform.OS === 'ios' ? verticalScale(30) : verticalScale(20)) }]}>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                    {currentSlide > 0 && (
-                        <TouchableOpacity onPress={handleBack} style={styles.backBtn} activeOpacity={0.8}>
-                            <Ionicons name="chevron-back" size={24} color={Colors.textSecondary} />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={handleNext} style={[styles.ctaBtn, { flex: 1, opacity: (Platform.OS === 'ios' && currentSlide === 6 && !acceptedAITerms) ? 0.5 : 1 }]} activeOpacity={0.8} disabled={Platform.OS === 'ios' && currentSlide === 6 && !acceptedAITerms}>
-                        <Text style={styles.ctaBtnText}>
-                            {currentSlide === totalSlides - 1 ? (Platform.OS === 'ios' ? 'I want my assistant now' : 'Commit for better health') : 'Continue'}
-                        </Text>
+            </View>
+
+            {!isAutoSlide && (
+                <View style={[styles.bottomControls, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+                    <TouchableOpacity onPress={handleNext} style={styles.primaryBtn} activeOpacity={0.8}>
+                        <Text style={styles.primaryBtnText}>Continue</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
-        </View>
+            )}
+        </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FCFBF8' },
-    skipRow: { flexDirection: 'row', justifyContent: 'center', paddingHorizontal: scale(16), paddingTop: Platform.OS === 'ios' ? verticalScale(56) : verticalScale(40), marginBottom: 20 },
-    stepText: { color: Colors.textMuted, fontSize: moderateScale(14), fontWeight: '700', letterSpacing: 2 },
-    slideScroll: { flexGrow: 1, paddingHorizontal: scale(24), paddingBottom: verticalScale(20) },
-    slideContent: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: verticalScale(12) },
+    container: { flex: 1, backgroundColor: THEME.bg },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, zIndex: 10 },
+    stepIndicator: { color: THEME.primary, fontSize: 16, fontWeight: '600' },
+    
+    slideCenter: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, backgroundColor: 'rgba(4, 11, 22, 0.7)' },
+    slideScrollCenter: { flexGrow: 1, alignItems: 'center', paddingHorizontal: 24, paddingTop: 40, paddingBottom: 100, backgroundColor: 'rgba(4, 11, 22, 0.7)' },
+    slideFull: { flex: 1, backgroundColor: 'transparent', position: 'relative' },
+    
+    title: { fontSize: 28, fontWeight: '700', color: THEME.primary, textAlign: 'center', marginBottom: 12 },
+    subtitle: { fontSize: 15, color: THEME.muted, textAlign: 'center', lineHeight: 22, marginBottom: 32 },
+    titleAbsolute: { position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center', fontSize: 24, fontWeight: '700', color: THEME.primary, zIndex: 10 },
+    
+    inputLabel: { color: THEME.primary, fontSize: 16, marginBottom: 12, textAlign: 'center' },
+    inputWrap: { width: '100%', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
+    input: { width: '100%', paddingVertical: 18, paddingHorizontal: 20, color: THEME.primary, fontSize: 16 },
+    
+    fullBgImage: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', resizeMode: 'cover' },
+    globalBottomGradient: { position: 'absolute', left: 0, right: 0, bottom: 0, height: height * 0.6 },
+    darkOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
+    
+    carouselContainer: { position: 'absolute', bottom: 40, left: 0, right: 0 },
+    addBtn: { width: 64, height: 64, borderRadius: 32, backgroundColor: THEME.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: THEME.bg },
+    proBadge: { position: 'absolute', top: -5, right: -5, backgroundColor: '#ef4444', borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+    avatarThumbWrap: { width: 64, height: 64 * (16/9), borderRadius: 16, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent', opacity: 0.6 },
+    avatarThumbSelected: { borderColor: THEME.accent, opacity: 1 },
+    avatarThumb: { width: '100%', height: '100%', resizeMode: 'cover' },
 
-    // Masonry
-    masonryAbsolute: { position: 'absolute', top: -50, left: -24, right: -24, height: height * 0.55 },
-    masonryWrapper: { flex: 1, overflow: 'hidden' },
-    masonryColumns: { flexDirection: 'row', paddingHorizontal: 16, gap: 12 },
-    masonryCol: { flex: 1, gap: 12 },
-    masonryCard: { backgroundColor: Colors.white, borderRadius: 16, padding: 16, ...Shadows.soft },
-    masonryTag: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, borderColor: Colors.borderLight, marginBottom: 8 },
-    masonryTagText: { fontSize: 11, fontWeight: '600', color: Colors.textSecondary },
-    masonryTitle: { fontSize: 16, fontWeight: '600', color: Colors.primary, lineHeight: 22 },
-    masonryImage: { width: '100%', height: 160, borderRadius: 16, resizeMode: 'cover' },
-    masonryGradientBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 150 },
-    welcomeTextOverlay: { zIndex: 10, width: '100%', backgroundColor: '#FCFBF8', paddingTop: 20, paddingBottom: 20 },
+    customContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingBottom: 24, paddingTop: 60 },
+    sectionLabel: { color: THEME.primary, fontSize: 16, fontWeight: '600', marginBottom: 12 },
+    slidersWrapperInline: { gap: 24, marginBottom: 24 },
+    
+    sliderContainer: { width: '100%' },
+    sliderLabels: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+    sliderLabel: { color: THEME.primary, fontSize: 15, fontWeight: '500' },
+    sliderTrackHitArea: { height: 40, justifyContent: 'center', position: 'relative' },
+    sliderTrack: { height: 4, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 2, width: '100%' },
+    sliderFill: { position: 'absolute', left: 0, height: '100%', backgroundColor: THEME.accent, borderRadius: 2 },
+    sliderThumb: { position: 'absolute', width: 24, height: 24, borderRadius: 12, backgroundColor: THEME.primary, top: 8, marginLeft: -12, elevation: 4, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.3, shadowRadius: 3 },
 
-    // Pills
-    pill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 18, borderRadius: Radii.card, backgroundColor: Colors.white, borderWidth: 2, borderColor: 'transparent', ...Shadows.soft },
-    pillSelected: { borderColor: '#2E7D5B', backgroundColor: '#F0FDF4' },
-    pillText: { fontSize: 16, fontWeight: '600', color: Colors.textSecondary },
-    pillTextSelected: { color: '#2E7D5B', fontWeight: '700' },
+    textArea: { width: '100%', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', color: THEME.primary, fontSize: 16, padding: 16, textAlignVertical: 'top' },
 
-    // Mini Pills
-    miniPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderRadius: Radii.pill, backgroundColor: Colors.white, borderWidth: 1.5, borderColor: Colors.borderLight },
-    miniPillSelected: { backgroundColor: '#F0FDF4', borderColor: '#2E7D5B' },
-    miniPillText: { fontSize: 14, fontWeight: '600', color: Colors.textSecondary },
-    miniPillTextSelected: { color: '#2E7D5B', fontWeight: '700' },
+    girlNameWrapper: { position: 'absolute', bottom: 40, left: 24, right: 24 },
+    transparentInput: { width: '100%', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', color: THEME.primary, fontSize: 18, paddingVertical: 18, paddingHorizontal: 24 },
 
-    sexPill: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: Radii.button, backgroundColor: Colors.white, borderWidth: 1.5, borderColor: Colors.borderLight },
-    sexPillSelected: { backgroundColor: '#F0FDF4', borderColor: '#2E7D5B' },
-    sexPillText: { fontSize: 15, fontWeight: '600', color: Colors.textSecondary },
-    sexPillTextSelected: { color: '#2E7D5B', fontWeight: '700' },
+    goalsContainer: { width: '100%', alignItems: 'center', gap: 16 },
+    goalPill: { width: '100%', paddingVertical: 18, borderRadius: 30, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center' },
+    goalPillSelected: { backgroundColor: THEME.primary, borderColor: THEME.primary },
+    goalText: { color: THEME.primary, fontSize: 16, fontWeight: '600' },
+    goalTextSelected: { color: THEME.bg },
 
-    // Slides
-    slideTitle: { fontSize: moderateScale(36), fontWeight: '500', color: Colors.primary, textAlign: 'left', lineHeight: moderateScale(42), letterSpacing: -1, marginBottom: verticalScale(16), width: '100%' },
-    slideSubtext: { fontSize: moderateScale(17), color: '#555', textAlign: 'left', lineHeight: moderateScale(26), width: '100%' },
-    superText: { fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, width: '100%', fontWeight: '600' },
-    pillBadge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#A2C4DD', marginBottom: 24 },
-    pillBadgeText: { fontSize: 12, fontWeight: '700', letterSpacing: 1, marginLeft: 6, color: '#A2C4DD' },
+    creatingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+    creatingTitle: { fontSize: 24, fontWeight: '700', color: THEME.primary, marginBottom: 40 },
+    spinnerWrap: { width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 50 },
+    spinnerRing: { position: 'absolute', width: '100%', height: '100%', borderRadius: 60, borderWidth: 4, borderColor: THEME.primary, borderLeftColor: 'transparent', transform: [{ rotate: '45deg' }] },
+    spinnerText: { color: THEME.primary, fontSize: 18, fontWeight: '700' },
+    progressList: { width: '100%', gap: 20 },
+    progressRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    progressCircle: { width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+    progressCircleActive: { backgroundColor: THEME.primary },
+    progressLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 16, fontWeight: '500' },
+    progressLabelActive: { color: THEME.primary, fontWeight: '700' },
 
-    // Controls
-    bottomControls: { paddingHorizontal: scale(24), paddingBottom: Platform.OS === 'ios' ? verticalScale(40) : verticalScale(24), paddingTop: verticalScale(16), backgroundColor: 'transparent' },
-    ctaBtn: { backgroundColor: Colors.accent, paddingVertical: verticalScale(18), borderRadius: Radii.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-    ctaBtnText: { color: Colors.white, fontSize: moderateScale(16), fontWeight: '500' },
-    backBtn: { backgroundColor: 'transparent', width: scale(60), alignItems: 'center', justifyContent: 'center' },
-    reviewCard: { backgroundColor: Colors.white, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.borderLight, ...Shadows.soft },
-    reviewCardText: { fontSize: 14, color: Colors.textSecondary, lineHeight: 20 },
-
-    // Auth
-    authContainer: { flex: 1, backgroundColor: '#FCFBF8' },
-    authScrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 },
-    authBrand: { alignItems: 'center', marginBottom: 8 },
-    authBrandText: { fontSize: 28, fontWeight: '900', color: Colors.primary, letterSpacing: -1 },
-    authAccent: { color: '#2E7D5B' },
-    authSubtitle: { fontSize: 16, color: Colors.textSecondary, textAlign: 'center', marginBottom: 32, fontWeight: '500' },
-    googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: Colors.white, paddingVertical: 16, borderRadius: Radii.button, borderWidth: 1, borderColor: Colors.borderLight, marginBottom: 12, ...Shadows.soft },
-    googleBtnText: { fontSize: 15, fontWeight: '700', color: Colors.primary },
-    appleBtn: { width: '100%', height: 50, marginBottom: 12 },
-    divider: { flexDirection: 'row', alignItems: 'center', gap: 16, marginVertical: 24 },
-    dividerLine: { flex: 1, height: 1, backgroundColor: Colors.borderLight },
-    dividerText: { fontSize: 13, color: Colors.textMuted, fontWeight: '600', textTransform: 'uppercase' },
-    inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.borderLight, borderRadius: Radii.input, paddingHorizontal: 16, ...Shadows.soft },
-    inputIcon: { marginRight: 12 },
-    input: { flex: 1, paddingVertical: 16, fontSize: 15, color: Colors.primary, fontWeight: '500' },
-    primaryBtn: { backgroundColor: '#2E7D5B', paddingVertical: 18, borderRadius: Radii.button, alignItems: 'center', marginTop: 12, ...Shadows.elevated },
-    primaryBtnText: { color: Colors.white, fontSize: 16, fontWeight: '800' },
-    toggleRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-    toggleText: { fontSize: 14, color: Colors.textSecondary },
-    toggleLink: { fontSize: 14, fontWeight: '700', color: '#2E7D5B' },
-    errorText: { color: Colors.danger, fontSize: 13, marginBottom: 16, textAlign: 'center' },
-
-    // Rating Slide Styles
-    ratingBanner: { width: '100%', height: verticalScale(140), resizeMode: 'contain', marginBottom: verticalScale(12) },
-    ratingMissionBadge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)', backgroundColor: 'rgba(239, 68, 68, 0.04)', marginBottom: verticalScale(12), gap: 6 },
-    ratingMissionText: { fontSize: 11, fontWeight: '800', letterSpacing: 1.2, color: '#ef4444' },
-    ratingStarsRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: verticalScale(8) },
-    ratingStarBtn: { padding: 6 },
-    ratingThankYou: { fontSize: 14, fontWeight: '700', color: '#10B981', textAlign: 'center', marginBottom: verticalScale(12) },
-    ratingReviewsWrap: { width: '100%', gap: 8, marginTop: verticalScale(4) },
-    ratingReviewCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: Colors.borderLight, gap: 10 },
-    ratingReviewStarsRow: { flexDirection: 'row', flexShrink: 0 },
-    ratingReviewText: { fontSize: 12, color: Colors.textSecondary, lineHeight: 17, flex: 1 },
-
-    // AI Terms Slide Styles
-    featureCard: { flexDirection: 'row', backgroundColor: Colors.white, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.borderLight, ...Shadows.soft, alignItems: 'center' },
-    featureIconWrap: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#F0FDF4', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-    featureCardTitle: { fontSize: 16, fontWeight: '700', color: Colors.primary, marginBottom: 4 },
-    featureCardDesc: { fontSize: 14, color: Colors.textSecondary, lineHeight: 20 },
-    termsBox: { width: '100%', padding: 16, borderRadius: 16, backgroundColor: 'rgba(46, 125, 91, 0.05)', borderWidth: 1, borderColor: 'rgba(46, 125, 91, 0.2)' },
-    termsCheckRow: { flexDirection: 'row', alignItems: 'flex-start' },
-    termsText: { flex: 1, fontSize: 13, color: Colors.textSecondary, lineHeight: 20, marginLeft: 12 },
-    termsHighlight: { color: '#ef4444', fontWeight: '800' },
+    bottomControls: { paddingHorizontal: 24, paddingTop: 16, backgroundColor: 'transparent' },
+    primaryBtn: { backgroundColor: THEME.primary, paddingVertical: 18, borderRadius: 30, alignItems: 'center' },
+    primaryBtnText: { color: THEME.bg, fontSize: 18, fontWeight: '700' },
 });

@@ -7,7 +7,7 @@ export default function LoadingSpinner({ message = 'Loading...' }) {
         <View style={styles.container}>
             <View style={styles.brand}>
                 <Image source={require('../../assets/appinside1.png')} style={styles.logo} />
-                <Text style={{ fontSize: 24, fontWeight: '700', color: Colors.accent }}>MedGPT</Text>
+                <Text style={{ fontSize: 24, fontWeight: '700', color: Colors.accent }}>AIGirl</Text>
             </View>
             <ActivityIndicator size="large" color={Colors.accent} style={{ marginTop: 12 }} />
             {message && <Text style={styles.message}>{message}</Text>}

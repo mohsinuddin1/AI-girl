@@ -81,7 +81,7 @@ export default function ScanScreen({ navigation }) {
         if (Platform.OS !== 'android' && !useStore.getState().hasAcceptedAITerms) {
             Alert.alert(
                 'AI Data Privacy',
-                'MedGPT uses third-party AI services (like Google Models and Groq Models) to analyze your health data and provide insights. Data is deleted after analysis and not stored. By continuing, you agree to share your chat messages and scanned reports with these providers.',
+                'AIGirl uses third-party AI services (like Google Models and Groq Models) to analyze your health data and provide insights. Data is deleted after analysis and not stored. By continuing, you agree to share your chat messages and scanned reports with these providers.',
                 [
                     { text: 'Cancel', style: 'cancel' },
                     { 
@@ -145,7 +145,7 @@ export default function ScanScreen({ navigation }) {
                 <Ionicons name="camera-outline" size={64} color={Colors.textMuted} />
                 <Text style={styles.permissionTitle}>Camera Access Required</Text>
                 <Text style={styles.permissionText}>
-                    MedGPT needs camera access to scan medical documents.
+                    AIGirl needs camera access to scan medical documents.
                 </Text>
                 <TouchableOpacity onPress={requestPermission} style={styles.permissionBtn}>
                     <Text style={styles.permissionBtnText}>Continue</Text>
@@ -212,7 +212,7 @@ export default function ScanScreen({ navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.topBarBtn}>
                     <Ionicons name="arrow-back" size={22} color={Colors.white} />
                 </TouchableOpacity>
-                <Text style={styles.topBarTitle}>MedGPT Scanner</Text>
+                <Text style={styles.topBarTitle}>AIGirl Scanner</Text>
                 <TouchableOpacity onPress={() => setTorchOn(!torchOn)} style={[styles.topBarBtn, torchOn && styles.topBarBtnActive]}>
                     <Ionicons name={torchOn ? 'flash' : 'flash-outline'} size={20} color={torchOn ? '#f0c060' : Colors.white} />
                 </TouchableOpacity>

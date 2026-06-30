@@ -4,7 +4,7 @@ import { FileUploadService } from './FileUploadService';
 
 export const ChatService = {
     /**
-     * Send a message to the MedGPT AI, including user memory and health preferences.
+     * Send a message to the AIGirl AI, including user memory and health preferences.
      * @param {string} message - The user's input message
      * @param {Array} history - Previous chat history
      * @returns {Promise<Object>} - The AI response
@@ -13,7 +13,7 @@ export const ChatService = {
         // STM: Keep only the last 5 messages for conversation continuity
         const slicedHistory = history.slice(-5);
         const state = useStore.getState();
-        const { user, profile, healthPreferences } = state;
+        const { user, profile, healthPreferences, selectedPersona } = state;
         
         // Save user message
         await this.saveMessage('user', message);
@@ -23,11 +23,13 @@ export const ChatService = {
             healthPreferences,
             scannedReportsSummary: profile?.medical_memory || '', // AI Memory
             userName: healthPreferences?.name || user?.user_metadata?.full_name || 'Guest',
+            persona: selectedPersona || null,
+            userMemory: profile?.memory || '',
         };
 
         try {
             if (!supabase) throw new Error('Supabase not initialized. Please check your connection.');
-            const response = await supabase.functions.invoke('medgpt-chat2', {
+            const response = await supabase.functions.invoke('aigirl-chat2', {
                 body: {
                     message,
                     history: slicedHistory,
@@ -104,7 +106,7 @@ export const ChatService = {
             
             // Update Supabase
             const { data, error } = await supabase
-                .from('users')
+                .from('aigirl_users')
                 .update({ medical_memory: newMemoryJson })
                 .eq('id', user.id)
                 .select()
@@ -116,6 +118,33 @@ export const ChatService = {
             useStore.setState({ profile: { ...profile, medical_memory: data.medical_memory } });
         } catch (error) {
             console.error('Failed to update AI Memory:', error);
+        }
+    },
+
+    /**
+     * Update the user's manual memory text.
+     * @param {string} text - The memory text
+     */
+    async updateUserMemory(text) {
+        const state = useStore.getState();
+        const { user, profile } = state;
+        
+        if (!user) return false;
+        
+        try {
+            const { error } = await supabase
+                .from('aigirl_users')
+                .update({ memory: text })
+                .eq('id', user.id);
+                
+            if (error) throw error;
+            
+            // Update local store
+            useStore.setState({ profile: { ...profile, memory: text } });
+            return true;
+        } catch (error) {
+            console.error('Failed to update manual memory:', error);
+            return false;
         }
     },
 
@@ -133,7 +162,7 @@ export const ChatService = {
 
             // 1. Get the user's daily scans
             const { data: userData, error: userError } = await supabase
-                .from('users')
+                .from('aigirl_users')
                 .select('is_pro, daily_scans, last_scan_date')
                 .eq('id', user.id)
                 .single();
@@ -143,7 +172,7 @@ export const ChatService = {
 
             // 2. Get the real limit from app_settings instead of hardcoding 1
             const { data: appSettings } = await supabase
-                .from('app_settings')
+                .from('aigirl_app_settings')
                 .select('free_daily_limit, free_scans_enabled')
                 .limit(1)
                 .single();
@@ -287,7 +316,7 @@ export const ChatService = {
         
         try {
             const { data, error } = await supabase
-                .from('chat_messages')
+                .from('aigirl_chat_messages')
                 .select('*')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: true })
@@ -337,7 +366,7 @@ export const ChatService = {
         
         try {
             const { data, error } = await supabase
-                .from('chat_messages')
+                .from('aigirl_chat_messages')
                 .insert({
                     user_id: user.id,
                     role,
@@ -366,7 +395,7 @@ export const ChatService = {
         
         try {
             const { error } = await supabase
-                .from('chat_messages')
+                .from('aigirl_chat_messages')
                 .delete()
                 .eq('user_id', user.id);
                 

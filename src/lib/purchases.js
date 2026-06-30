@@ -146,7 +146,7 @@ async function syncProStatus(isPro) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             await supabase
-                .from('users')
+                .from('aigirl_users')
                 .update({ is_pro: isPro })
                 .eq('id', user.id);
         }

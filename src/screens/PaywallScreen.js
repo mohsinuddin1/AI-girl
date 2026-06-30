@@ -12,6 +12,7 @@ import {
     BackHandler,
     ScrollView,
     Image,
+    ImageBackground,
 } from 'react-native';
 import Animated, {
     withRepeat,
@@ -32,20 +33,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const PLANS = [
     {
         id: 'annual',
-        name: 'Annual',
+        name: '1 YEAR',
         period: 'billed yearly',
-        price: '$39.99',
-        perWeek: '$0.77/week',
+        price: '₹3,700.00',
+        weeklyPrice: '₹71.15',
         trial: '3 days free trial',
-        discount: 'Best Value',
+        discount: 'Save 90%',
         recommended: true,
     },
     {
         id: 'monthly',
-        name: 'Monthly',
+        name: '1 MONTH',
         period: 'billed monthly',
-        price: '$8.99',
-        perWeek: '$2.07/week',
+        price: '₹1,100.00',
+        weeklyPrice: '₹275.00',
+        trial: null,
+        discount: null,
+        recommended: false,
+    },
+    {
+        id: 'weekly',
+        name: '1 WEEK',
+        period: 'billed weekly',
+        price: '₹550.00',
+        weeklyPrice: '₹550.00',
         trial: null,
         discount: null,
         recommended: false,
@@ -53,10 +64,10 @@ const PLANS = [
 ];
 
 const FEATURES = [
-    { icon: 'document-text', text: 'Unlimited Medical Scans: Analyze blood reports, lab results, and health documents instantly.' },
-    { icon: 'chatbubbles', text: 'AI Health Chat: Ask MedGPT anything — your personal medical assistant, available 24/7.' },
-    { icon: 'heart', text: 'Personalized Insights: Tailored to your conditions, allergies, and health goals.' },
-    { icon: 'shield-checkmark', text: 'Long-Term Memory: MedGPT remembers your history and gives smarter answers over time.' },
+    { icon: 'infinite', text: 'Unlimited Chat' },
+    { icon: 'call', text: 'Unlock AI Calling' },
+    { icon: 'lock-closed', text: 'Unlock Images & Videos' },
+    { icon: 'sparkles', text: 'Personalized Experience' },
 ];
 
 export default function PaywallScreen({ navigation, route, isHardPaywall = false }) {
@@ -75,7 +86,7 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
         return () => { isMounted.current = false; };
     }, []);
 
-    const { user, profile, fetchProfile, healthPreferences, scanHistory } = useStore();
+    const { user, profile, fetchProfile, healthPreferences, scanHistory, selectedPersona } = useStore();
     const { purchasesInitialized } = useAuth();
     const insets = useSafeAreaInsets();
 
@@ -118,31 +129,40 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
         if (!offerings) {
             return [
                 {
-                    id: '$rc_annual',
-                    name: 'Annual',
-                    period: 'billed yearly',
-                    price: '$39.99',
-                    perWeek: '$0.77/week',
-                    trial: '3 days free trial',
-                    discount: 'Best Value',
-                    recommended: true,
-                },
-                {
-                    id: '$rc_monthly',
-                    name: 'Monthly',
-                    period: 'billed monthly',
-                    price: '$8.99',
-                    perWeek: '$2.07/week',
+                    id: '$rc_weekly',
+                    name: '1 WEEK',
+                    period: 'billed weekly',
+                    price: '₹550.00',
+                    weeklyPrice: '₹550.00',
                     trial: null,
                     discount: null,
                     recommended: false,
+                },
+                {
+                    id: '$rc_monthly',
+                    name: '1 MONTH',
+                    period: 'billed monthly',
+                    price: '₹1,100.00',
+                    weeklyPrice: '₹275.00',
+                    trial: null,
+                    discount: null,
+                    recommended: false,
+                },
+                {
+                    id: '$rc_annual',
+                    name: '1 YEAR',
+                    period: 'billed yearly',
+                    price: '₹3,700.00',
+                    weeklyPrice: '₹71.15',
+                    trial: '3 days free trial',
+                    discount: 'Save 90%',
+                    recommended: true,
                 },
             ];
         }
 
         const packages = offerings.availablePackages || [];
         const metadata = offerings.metadata || {};
-        // Support both the old object map AND the flat keys just in case
         const highlights = metadata.highlights || {};
         const trials = metadata.trials || {};
 
@@ -151,12 +171,7 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
         }
 
         const parseIntroPrice = (product, packageId) => {
-            // 1. Manual override from RevenueCat metadata JSON
-            if (trials[packageId]) {
-                return trials[packageId];
-            }
-
-            // 2. Automatic detection from App Store / Google Play
+            if (trials[packageId]) return trials[packageId];
             if (product.introPrice && product.introPrice.price === 0) {
                 const { periodNumberOfUnits, periodUnit } = product.introPrice;
                 if (periodNumberOfUnits && periodUnit) {
@@ -171,10 +186,10 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
             const product = pkg.product;
             let price = product.priceString || '$0.00';
             let trial = parseIntroPrice(product, pkg.identifier);
-            let perWeek = null;
-            let name = pkg.packageType === 'ANNUAL' ? 'Annual' :
-                pkg.packageType === 'MONTHLY' ? 'Monthly' :
-                    pkg.packageType === 'WEEKLY' ? 'Weekly' : 'Plan';
+            let weeklyPrice = null;
+            let name = pkg.packageType === 'ANNUAL' ? '1 YEAR' :
+                pkg.packageType === 'MONTHLY' ? '1 MONTH' :
+                    pkg.packageType === 'WEEKLY' ? '1 WEEK' : 'PLAN';
             let period = pkg.packageType === 'ANNUAL' ? 'billed yearly' :
                 pkg.packageType === 'MONTHLY' ? 'billed monthly' :
                     pkg.packageType === 'WEEKLY' ? 'billed weekly' : '';
@@ -183,12 +198,12 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                 const currencySymbol = price.replace(/[\d.,]/g, '').trim() || '$';
                 if (pkg.packageType === 'ANNUAL') {
                     const weeklyValue = (product.price / 52).toFixed(2);
-                    perWeek = `${currencySymbol}${weeklyValue}/week`;
+                    weeklyPrice = `${currencySymbol}${weeklyValue}`;
                 } else if (pkg.packageType === 'MONTHLY') {
                     const weeklyValue = ((product.price * 12) / 52).toFixed(2);
-                    perWeek = `${currencySymbol}${weeklyValue}/week`;
+                    weeklyPrice = `${currencySymbol}${weeklyValue}`;
                 } else if (pkg.packageType === 'WEEKLY') {
-                    perWeek = `${price}/week`;
+                    weeklyPrice = `${price}`;
                 }
             }
 
@@ -197,14 +212,17 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                 name: name,
                 period: period,
                 price: price,
-                perWeek: perWeek,
+                weeklyPrice: weeklyPrice || price,
                 trial: trial,
-                discount: highlights[pkg.identifier] || null,
-                recommended: !!highlights[pkg.identifier],
+                discount: highlights[pkg.identifier] || (pkg.packageType === 'ANNUAL' ? 'Save 90%' : null),
+                recommended: !!highlights[pkg.identifier] || pkg.packageType === 'ANNUAL',
             };
         };
 
-        return packages.map(generatePlanData);
+        const order = { 'WEEKLY': 1, 'MONTHLY': 2, 'ANNUAL': 3 };
+        const sortedPackages = [...packages].sort((a, b) => (order[a.packageType] || 99) - (order[b.packageType] || 99));
+
+        return sortedPackages.map(generatePlanData);
     }, [offerings]);
 
     const activePlan = dynamicPlans.find(plan => plan.id === selectedPlan) || dynamicPlans[0];
@@ -410,16 +428,17 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
     };
 
     return (
-        <View style={styles.container}>
-            {/* Close — hidden on hard paywall */}
-            {showClose && (
-                <View style={styles.closeRow}>
+        <ImageBackground source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/appinside1.png')} style={styles.container} resizeMode="cover">
+            {/* Dark gradient overlay */}
+            <View style={styles.overlay} />
+
+            {/* Header: Close & Restore */}
+            <View style={[styles.headerRow, { paddingTop: Platform.OS === 'ios' ? 50 : 36 }]}>
+                {showClose ? (
                     <TouchableOpacity
                         onPress={() => {
                             posthog.capture('paywall_dismissed', { context, time_spent_seconds: Math.round((Date.now() - paywallOpenedAt.current) / 1000) });
                             if (isHardPaywall) {
-                                // Hard paywall: setOnboarded() triggers navigator tree swap
-                                // which unmounts this screen — no manual navigation needed
                                 useStore.getState().setOnboarded();
                                 return;
                             }
@@ -431,49 +450,49 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                         }}
                         style={styles.closeBtn}
                     >
-                        <Ionicons name="close" size={20} color={Colors.primary} />
+                        <Ionicons name="close" size={20} color="#333" />
                     </TouchableOpacity>
-                </View>
-            )}
+                ) : <View style={styles.closeBtnPlaceholder} />}
+                
+                <TouchableOpacity onPress={handleRestore} disabled={restoring} style={styles.restoreBtn}>
+                    <Text style={styles.restoreText}>
+                        {restoring ? 'Restoring...' : 'Restore'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
-            {/* Main Content — ScrollView ensures all plans are visible on any screen size */}
+            {/* Main Content */}
             <ScrollView
                 style={styles.mainContent}
-                contentContainerStyle={[styles.mainContentInner, { paddingTop: Math.max(insets.top + 10, 16) }]}
+                contentContainerStyle={styles.mainContentInner}
                 showsVerticalScrollIndicator={false}
                 bounces={true}
-                keyboardShouldPersistTaps="handled"
             >
-                <View style={styles.contentConstraint}>
-                    {/* Hero */}
-                    <View style={styles.heroContainer}>
-                        <Image source={require('../../assets/appinside1.png')} style={{ width: 80, height: 80, borderRadius: 20, marginBottom: 4, resizeMode: 'contain' }} />
-                        <Text style={styles.heroHeadline}>
-                            {'Your Health, Understood'}
-                        </Text>
-                        <Text style={styles.heroHeadlineHighlight}>
-                            {riskCount > 0
-                                ? `${riskCount} Condition${riskCount > 1 ? 's' : ''} Being Monitored`
-                                : 'Personal Medical AI'}
-                        </Text>
-                        <Text style={styles.heroSubtext}>
-                            {`Scan reports, chat with your AI doctor, and track your health — all in one place.\nLet's protect your ${goalLabel} together.`}
-                        </Text>
+                {/* Hero / Title */}
+                <View style={styles.heroContainer}>
+                    <View style={styles.titleWrapper}>
+                        <Text style={styles.titleText}>MyGirl AI</Text>
+                        <View style={styles.proBadge}>
+                            <Text style={styles.proBadgeText}>PRO</Text>
+                        </View>
                     </View>
+                </View>
 
-                    {/* Features */}
-                    <View style={styles.featuresList}>
-                        {FEATURES.map((feat, i) => (
-                            <View key={i} style={styles.featureRow}>
-                                <Ionicons name={feat.icon} size={20} color="#2E9E6D" style={{ marginRight: 10 }} />
-                                <Text style={styles.featureText}>{feat.text}</Text>
-                            </View>
-                        ))}
-                    </View>
+                {/* Features */}
+                <View style={styles.featuresList}>
+                    {FEATURES.map((feat, i) => (
+                        <View key={i} style={styles.featureRow}>
+                            <Ionicons name={feat.icon} size={20} color="#fff" style={styles.featureIcon} />
+                            <Text style={styles.featureText}>{feat.text}</Text>
+                        </View>
+                    ))}
+                </View>
 
-                    {/* Plans */}
-                    <View style={styles.plansSection}>
-                        {dynamicPlans.map((plan) => (
+                {/* Plans */}
+                <View style={styles.plansSection}>
+                    {dynamicPlans.map((plan) => {
+                        const isSelected = selectedPlan === plan.id;
+                        return (
                             <TouchableOpacity
                                 key={plan.id}
                                 onPress={() => {
@@ -482,7 +501,7 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                                 }}
                                 style={[
                                     styles.planCard,
-                                    selectedPlan === plan.id && styles.planCardSelected,
+                                    isSelected && styles.planCardSelected,
                                 ]}
                                 activeOpacity={0.9}
                             >
@@ -491,41 +510,23 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                                         <Text style={styles.discountText}>{plan.discount}</Text>
                                     </View>
                                 )}
-                                <View style={styles.planRow}>
-                                    <View
-                                        style={[
-                                            styles.radioCircle,
-                                            selectedPlan === plan.id && styles.radioCircleSelected,
-                                        ]}
-                                    >
-                                        {selectedPlan === plan.id && (
-                                            <Ionicons name="checkmark" size={12} color={Colors.white} />
-                                        )}
-                                    </View>
-                                    <View style={{ flex: 1, marginLeft: 4 }}>
-                                        <Text style={styles.planName}>{plan.name}</Text>
-                                        {plan.perWeek ? <Text style={styles.planPerWeek}>{plan.perWeek}</Text> : null}
-                                        {plan.trial && (
-                                            <Text style={styles.planTrial}>{plan.trial}</Text>
-                                        )}
-                                    </View>
-                                    <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
-                                        <Text style={styles.planTotal}>{plan.price}</Text>
-                                        <Text style={styles.planPeriodText}>{plan.period}</Text>
-                                    </View>
+                                <View style={styles.planTopPart}>
+                                    <Text style={styles.planName}>{plan.name}</Text>
+                                    <Text style={styles.planPrice}>{plan.price}</Text>
+                                </View>
+                                <View style={[styles.planBottomPart, isSelected && styles.planBottomPartSelected]}>
+                                    <Text style={[styles.planWeeklyValue, isSelected && styles.planWeeklyValueSelected]}>{plan.weeklyPrice}</Text>
+                                    <Text style={[styles.planWeeklyLabel, isSelected && styles.planWeeklyLabelSelected]}>PER WEEK</Text>
                                 </View>
                             </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    {/* Error */}
-                    {error ? (
-                        <Text style={styles.errorText}>{error}</Text>
-                    ) : null}
+                        );
+                    })}
                 </View>
+
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </ScrollView>
 
-            {/* Bottom CTA — Fixed at bottom */}
+            {/* Bottom CTA */}
             <View style={[styles.ctaContainer, { paddingBottom: (Platform.OS === 'ios' ? verticalScale(36) : verticalScale(32)) + insets.bottom }]}>
                 <Animated.View style={animatedCtaStyle}>
                     <TouchableOpacity
@@ -534,115 +535,113 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
                         style={[styles.ctaBtn, (loading || offeringsLoading) && { opacity: 0.6 }]}
                         activeOpacity={0.8}
                     >
-                        {loading ? (
-                            <View style={styles.ctaLoading}>
-                                <ActivityIndicator size="small" color={Colors.white} />
-                                <Text style={styles.ctaBtnText}>Processing...</Text>
-                            </View>
-                        ) : offeringsLoading ? (
-                            <View style={styles.ctaLoading}>
-                                <ActivityIndicator size="small" color={Colors.white} />
-                                <Text style={styles.ctaBtnText}>Loading plans...</Text>
-                            </View>
+                        {loading || offeringsLoading ? (
+                            <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Text style={styles.ctaBtnText}>
-                                {activePlan?.trial ? 'Start Your FREE Trial' : 'Continue'}
-                            </Text>
+                            <Text style={styles.ctaBtnText}>Continue</Text>
                         )}
                     </TouchableOpacity>
                 </Animated.View>
 
-                {/* Subscription Legal Terms */}
                 <Text style={styles.subscriptionTermsText}>
-                    {(() => {
-                        const periodLabel = activePlan?.period?.replace('billed ', '') || '';
-                        const priceWithPeriod = periodLabel ? `${activePlan?.price}/${periodLabel}` : activePlan?.price;
-                        return activePlan?.trial
-                            ? `${activePlan.trial}, then ${priceWithPeriod}. `
-                            : `${priceWithPeriod}. `;
-                    })()}
-                    {activePlan?.discount?.toLowerCase()?.includes('prepaid')
-                        ? 'One-time payment. Does not auto-renew.'
-                        : `Auto-renews. Cancel anytime in ${Platform.OS === 'ios' ? 'App Store' : 'Google Play'} settings at least 24 hrs before renewal.`}
+                    Subscription renews automatically. You can cancel anytime.
                 </Text>
 
-                <View style={styles.bottomRow}>
-                    <TouchableOpacity onPress={handleRestore} disabled={restoring}>
-                        <Text style={styles.restoreText}>
-                            {restoring ? 'Restoring...' : 'Restore purchases'}
-                        </Text>
+                <View style={styles.legalRow}>
+                    <TouchableOpacity onPress={() => Linking.openURL('https://webpure-scan-ai.vercel.app/privacy')}>
+                        <Text style={styles.legalLink}>Privacy Policy</Text>
                     </TouchableOpacity>
-
-                    <View style={styles.legalRow}>
-                        <TouchableOpacity onPress={() => Linking.openURL('https://webpure-scan-ai.vercel.app/terms')}>
-                            <Text style={styles.legalLink}>Terms of Service</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.legalDivider}>|</Text>
-                        <TouchableOpacity onPress={() => Linking.openURL('https://webpure-scan-ai.vercel.app/privacy')}>
-                            <Text style={styles.legalLink}>Privacy Policy</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Text style={styles.legalDivider}>|</Text>
+                    <TouchableOpacity onPress={() => Linking.openURL('https://webpure-scan-ai.vercel.app/terms')}>
+                        <Text style={styles.legalLink}>Term and Condition</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </ImageBackground>
     );
 }
 
-const MAX_CONTENT_WIDTH = 500;
-
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FFFFFF' },
+    container: { flex: 1, backgroundColor: '#000' },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        zIndex: 10,
+    },
+    closeBtn: {
+        width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.7)', alignItems: 'center', justifyContent: 'center'
+    },
+    closeBtnPlaceholder: { width: 36, height: 36 },
+    restoreBtn: { paddingVertical: 8, paddingHorizontal: 12 },
+    restoreText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+    
+    mainContent: { flex: 1, zIndex: 5 },
+    mainContentInner: { 
+        flexGrow: 1, 
+        justifyContent: 'flex-end', 
+        paddingHorizontal: 16, 
+        paddingBottom: 20,
+        paddingTop: 100,
+    },
 
-    closeRow: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 36, right: 0, paddingHorizontal: scale(20), zIndex: 100 },
-    closeBtn: { width: scale(36), height: scale(36), borderRadius: scale(18), alignItems: 'center', justifyContent: 'center' },
+    heroContainer: { alignItems: 'center', marginBottom: 24 },
+    titleWrapper: { flexDirection: 'row', alignItems: 'center' },
+    titleText: { fontSize: 32, fontWeight: '800', color: '#fff' },
+    proBadge: { backgroundColor: '#8E74FF', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginLeft: 8 },
+    proBadgeText: { color: '#fff', fontSize: 12, fontWeight: '800' },
 
-    // ScrollView takes remaining space; contentContainer handles spacing
-    mainContent: { flex: 1 },
-    mainContentInner: { flexGrow: 1, justifyContent: 'flex-start', paddingHorizontal: scale(20), paddingTop: moderateVerticalScale(16), paddingBottom: moderateVerticalScale(32) },
+    featuresList: { alignItems: 'center', marginBottom: 32 },
+    featureRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: 260 },
+    featureIcon: { marginRight: 16, width: 24, textAlign: 'center' },
+    featureText: { fontSize: 16, color: '#fff', fontWeight: '600' },
 
-    // Constrain content width on wider screens (iPad) for readability
-    contentConstraint: { width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
+    plansSection: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+    planCard: { 
+        flex: 1, 
+        backgroundColor: '#0a0a0a', 
+        borderRadius: 16, 
+        borderWidth: 1.5, 
+        borderColor: '#333', 
+        overflow: 'visible',
+    },
+    planCardSelected: { borderColor: '#8E74FF', borderWidth: 2 },
+    discountBadge: { 
+        position: 'absolute', top: -12, left: 0, right: 0, 
+        backgroundColor: '#8E74FF', 
+        borderRadius: 10, 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        paddingVertical: 2,
+        marginHorizontal: '10%'
+    },
+    discountText: { fontSize: 10, fontWeight: '800', color: '#fff' },
+    
+    planTopPart: { padding: 12, alignItems: 'center', justifyContent: 'center', height: 80 },
+    planName: { fontSize: 16, fontWeight: '800', color: '#fff', marginBottom: 6 },
+    planPrice: { fontSize: 13, color: '#ccc', fontWeight: '600' },
+    
+    planBottomPart: { backgroundColor: '#333', borderBottomLeftRadius: 14, borderBottomRightRadius: 14, paddingVertical: 10, alignItems: 'center' },
+    planBottomPartSelected: { backgroundColor: '#8E74FF' },
+    planWeeklyValue: { fontSize: 14, fontWeight: '700', color: '#fff' },
+    planWeeklyValueSelected: { color: '#fff' },
+    planWeeklyLabel: { fontSize: 10, fontWeight: '700', color: '#aaa', marginTop: 2 },
+    planWeeklyLabelSelected: { color: '#fff' },
 
-    // Hero
-    heroContainer: { alignItems: 'center', marginBottom: moderateVerticalScale(16) },
-    heroHeadline: { fontSize: moderateScale(20), fontWeight: '800', color: Colors.primary, textAlign: 'center' },
-    heroHeadlineHighlight: { fontSize: moderateScale(24), fontWeight: '900', color: '#2E9E6D', textAlign: 'center', marginTop: moderateVerticalScale(2), marginBottom: moderateVerticalScale(6) },
-    heroSubtext: { fontSize: moderateScale(13), color: Colors.textSecondary, textAlign: 'center', lineHeight: moderateScale(19), fontWeight: '500' },
+    errorText: { color: '#ff4444', fontSize: 14, textAlign: 'center', marginTop: 16 },
 
-    // Features
-    featuresList: { marginHorizontal: scale(12), marginBottom: moderateVerticalScale(16) },
-    featureRow: { flexDirection: 'row', alignItems: 'center', marginBottom: moderateVerticalScale(10) },
-    featureText: { fontSize: moderateScale(13), color: Colors.textSecondary, flex: 1, lineHeight: moderateScale(18), fontWeight: '600' },
-
-    // Plans
-    plansSection: { gap: moderateVerticalScale(12) },
-    planCard: { padding: moderateScale(14), borderRadius: scale(20), borderWidth: 1.5, borderColor: Colors.borderLight, backgroundColor: '#FFFFFF', position: 'relative' },
-    planCardSelected: { borderColor: Colors.primary, borderWidth: 2 },
-    discountBadge: { position: 'absolute', top: -10, right: 20, backgroundColor: Colors.primary, paddingHorizontal: scale(10), paddingVertical: moderateVerticalScale(3), borderRadius: scale(14) },
-    discountText: { fontSize: moderateScale(10), fontWeight: '800', color: Colors.white, letterSpacing: 0.5 },
-    planRow: { flexDirection: 'row', alignItems: 'center', gap: scale(12) },
-    radioCircle: { width: moderateScale(20), height: moderateScale(20), borderRadius: moderateScale(10), borderWidth: 1.5, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
-    radioCircleSelected: { borderColor: Colors.primary, backgroundColor: Colors.primary },
-    planName: { fontSize: moderateScale(16), fontWeight: '800', color: Colors.primary },
-    planPerWeek: { fontSize: moderateScale(15), fontWeight: '800', color: Colors.primary, marginTop: moderateVerticalScale(2) },
-    planTrial: { fontSize: moderateScale(11), fontWeight: '700', color: '#2E9E6D', marginTop: moderateVerticalScale(4) },
-    planTotal: { fontSize: moderateScale(16), fontWeight: '800', color: Colors.primary },
-    planPeriodText: { fontSize: moderateScale(12), color: Colors.textSecondary, marginTop: moderateVerticalScale(2), fontWeight: '500' },
-
-    errorText: { color: Colors.danger, fontSize: moderateScale(12), textAlign: 'center', marginTop: moderateVerticalScale(4) },
-
-    // CTA Fixed Bottom
-    ctaContainer: { paddingHorizontal: scale(20), paddingBottom: Platform.OS === 'ios' ? verticalScale(32) : verticalScale(16), paddingTop: verticalScale(12), backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.04)' },
-    ctaSocialContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: moderateVerticalScale(8), gap: scale(4) },
-    ctaSocialText: { fontSize: moderateScale(11), color: Colors.textSecondary, fontWeight: '600' },
-    ctaBtn: { backgroundColor: '#2E9E6D', paddingVertical: verticalScale(16), borderRadius: scale(16), alignItems: 'center', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center', width: '100%', ...Shadows.elevated },
-    ctaLoading: { flexDirection: 'row', alignItems: 'center', gap: scale(8) },
-    ctaBtnText: { color: Colors.white, fontSize: moderateScale(16), fontWeight: '800' },
-    subscriptionTermsText: { textAlign: 'center', color: Colors.textMuted, fontSize: moderateScale(9.5), marginTop: moderateVerticalScale(8), fontWeight: '400', lineHeight: moderateScale(13), maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
-    bottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: moderateVerticalScale(10), maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center', width: '100%' },
-    restoreText: { color: Colors.textSecondary, fontSize: moderateScale(11), textDecorationLine: 'underline' },
-    legalRow: { flexDirection: 'row', alignItems: 'center', gap: scale(6) },
-    legalLink: { fontSize: moderateScale(10), color: Colors.textMuted, textDecorationLine: 'underline' },
-    legalDivider: { fontSize: moderateScale(10), color: Colors.textMuted },
+    ctaContainer: { paddingHorizontal: 20, backgroundColor: 'transparent', paddingTop: 16 },
+    ctaBtn: { backgroundColor: '#8E74FF', paddingVertical: 16, borderRadius: 16, alignItems: 'center' },
+    ctaBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
+    
+    subscriptionTermsText: { textAlign: 'center', color: '#aaa', fontSize: 10, marginTop: 16, fontWeight: '500' },
+    legalRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 16 },
+    legalLink: { fontSize: 10, color: '#aaa', fontWeight: '600' },
+    legalDivider: { fontSize: 10, color: '#aaa' },
 });
 

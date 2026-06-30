@@ -146,7 +146,7 @@ serve(async (req) => {
             
             // Fetch AI provider setting
             try {
-                const { data: settings } = await supabase.from('app_settings').select('use_gemini_chats').limit(1).single();
+                const { data: settings } = await supabase.from('aigirl_app_settings').select('use_gemini_chats').limit(1).single();
                 if (settings && typeof settings.use_gemini_chats === 'boolean') {
                     USE_GEMINI = settings.use_gemini_chats;
                 }
@@ -158,7 +158,7 @@ serve(async (req) => {
             
             if (user) {
                 // Increment chat usage / Check rate limits
-                const { error: usageError } = await supabase.rpc('increment_chat_usage', { p_user_id: user.id })
+                const { error: usageError } = await supabase.rpc('increment_aigirl_chat_usage', { p_user_id: user.id })
                 if (usageError) {
                     if (usageError.message?.includes('RATE_LIMIT_EXCEEDED') || usageError.message?.includes('Limit')) {
                         return new Response(JSON.stringify({ 
@@ -183,7 +183,7 @@ serve(async (req) => {
         const userAllergies = (prefs.allergies || []).join(', ') || 'None reported';
         const userGoals = (prefs.goals || []).join(', ') || 'None reported';
 
-        let systemInstruction = `You are MedGPT, a highly intelligent and empathetic AI medical assistant. 
+        let systemInstruction = `You are AIGirl, a highly intelligent and empathetic AI medical assistant. 
 You provide clear, accurate, and easy-to-understand health information. Always act as a supportive guide.
 Be concise. Do not play a doctor, always remind the user to consult a real physician for serious concerns.
 If you are 100% certain about a medical fact, please include a brief citation to the source (e.g. FDA, WHO).

@@ -53,7 +53,7 @@ export async function registerForPushNotificationsAsync() {
     // Android-specific notification channel
     if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('default', {
-            name: 'MedGPT',
+            name: 'AIGirl',
             importance: Notifications.AndroidImportance.HIGH,
             vibrationPattern: [0, 250, 250, 250],
             lightColor: '#e8a838',
@@ -165,7 +165,7 @@ export async function saveNotificationPreferences(userId, preferences) {
 
     try {
         const { error } = await supabase
-            .from('users')
+            .from('aigirl_users')
             .update({ notification_preferences: preferences })
             .eq('id', userId);
 
@@ -181,7 +181,7 @@ export async function loadNotificationPreferences(userId) {
 
     try {
         const { data, error } = await supabase
-            .from('users')
+            .from('aigirl_users')
             .select('notification_preferences')
             .eq('id', userId)
             .single();

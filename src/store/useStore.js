@@ -44,6 +44,7 @@ const useStore = create((set, get) => ({
     appSettings: DEFAULT_APP_SETTINGS,
 
     // Scan state
+    companionProfile: null,
     scanResult: null,
     isAnalyzing: false,
     scanHistory: [],
@@ -92,6 +93,68 @@ const useStore = create((set, get) => ({
     showMascot: true,
     skipNotFoundModal: false,
 
+    // Persona state
+    personas: [],
+    selectedPersona: null,
+    
+    fetchPersonas: async () => {
+        try {
+            const { data, error } = await supabase.from('ai_personas').select('*').eq('is_visible', true).order('created_at', { ascending: true });
+            if (!error && data) {
+                set({ personas: data });
+                // If we have a saved ID, select it
+                const savedId = await AsyncStorage.getItem('purescan_selected_persona_id');
+                
+                if (savedId === 'custom') {
+                    const customDataStr = await AsyncStorage.getItem('purescan_custom_persona_data');
+                    if (customDataStr) {
+                        try {
+                            const customData = JSON.parse(customDataStr);
+                            set({ selectedPersona: customData });
+                            return;
+                        } catch (e) {
+                            console.error('Failed to parse custom persona data', e);
+                        }
+                    }
+                }
+                
+                if (savedId) {
+                    const found = data.find(p => p.id === savedId);
+                    if (found) set({ selectedPersona: found });
+                } else if (data.length > 0) {
+                    // Default to first persona
+                    set({ selectedPersona: data[0] });
+                }
+            }
+        } catch (e) {
+            console.error('Failed to fetch personas', e);
+        }
+    },
+    
+    setSelectedPersona: async (persona) => {
+        set({ selectedPersona: persona });
+        if (persona?.id) {
+            await AsyncStorage.setItem('purescan_selected_persona_id', persona.id);
+            if (persona.id === 'custom') {
+                await AsyncStorage.setItem('purescan_custom_persona_data', JSON.stringify(persona));
+            }
+        }
+    },
+    
+    updateCustomPersona: async (customData) => {
+        const { selectedPersona } = get();
+        if (selectedPersona && selectedPersona.id === 'custom') {
+            const updated = { 
+                ...selectedPersona, 
+                ...customData,
+                personality: customData.personality 
+                    ? { ...selectedPersona.personality, ...customData.personality }
+                    : selectedPersona.personality
+            };
+            get().setSelectedPersona(updated);
+        }
+    },
+
     // Init onboarding check
     checkOnboarding: async () => {
         try {
@@ -108,6 +171,8 @@ const useStore = create((set, get) => ({
                 skipNotFoundModal: skipModal === 'true',
                 hasAcceptedAITerms: acceptedAITerms === 'true',
             });
+            // Fetch personas right after initialization
+            get().fetchPersonas();
         } catch (e) {
             console.error('Failed to read onboarding state:', e);
             set({ onboardingLoaded: true }); // Prevent infinite loading
@@ -181,7 +246,7 @@ const useStore = create((set, get) => ({
         if (user && supabase) {
             try {
                 await supabase
-                    .from('users')
+                    .from('aigirl_users')
                     .update({ health_preferences: prefs })
                     .eq('id', user.id);
             } catch (err) {
@@ -213,7 +278,7 @@ const useStore = create((set, get) => ({
         }
         try {
             const { data, error } = await supabase
-                .from('users')
+                .from('aigirl_users')
                 .select('*')
                 .eq('id', userId)
                 .single();
@@ -223,10 +288,11 @@ const useStore = create((set, get) => ({
             if (error && error.code === 'PGRST116') {
                 const prefs = get().healthPreferences;
                 const { data: newProfile, error: createError } = await supabase
-                    .from('users')
+                    .from('aigirl_users')
                     .upsert({
                         id: userId,
                         email: get().user?.email,
+                        name: get().companionProfile?.userName || null,
                         daily_scans: 0,
                         current_streak: 0,
                         level_xp: 0,
@@ -240,7 +306,7 @@ const useStore = create((set, get) => ({
                     // ignoreDuplicates + single() can return PGRST116 if row existed
                     // and was skipped — just re-fetch the existing row
                     const { data: existing } = await supabase
-                        .from('users')
+                        .from('aigirl_users')
                         .select('*')
                         .eq('id', userId)
                         .single();
@@ -255,13 +321,13 @@ const useStore = create((set, get) => ({
             }
 
             // Initialize and sync rate limiting schema using RPC
-            const { data: usageData, error: usageError } = await supabase.rpc('get_scan_usage', { p_user_id: userId });
+            const { data: usageData, error: usageError } = await supabase.rpc('get_aigirl_scan_usage', { p_user_id: userId });
 
             // Re-sync legacy daily_scans fields just in case it diverged, but let RPC handle the resets
             if (usageData && !usageError) {
                 if (currentData.daily_scans !== usageData.daily_scans || currentData.last_scan_date !== usageData.last_reset_day) {
                     const { data: updated } = await supabase
-                        .from('users')
+                        .from('aigirl_users')
                         .update({ daily_scans: usageData.daily_scans, last_scan_date: usageData.last_reset_day })
                         .eq('id', userId)
                         .select()
@@ -276,7 +342,7 @@ const useStore = create((set, get) => ({
 
             // Fetch app settings for dynamic limits
             const { data: settingsData, error: settingsError } = await supabase
-                .from('app_settings')
+                .from('aigirl_app_settings')
                 .select('*')
                 .limit(1)
                 .single();
@@ -355,7 +421,7 @@ const useStore = create((set, get) => ({
 
         // Backend enforcement: Usage relies on the backend now that we successfully invoked the edge function
         // We just fetch the updated usage so the UI updates
-        const { data: usageData, error: usageError } = await supabase.rpc('get_scan_usage', { p_user_id: user.id });
+        const { data: usageData, error: usageError } = await supabase.rpc('get_aigirl_scan_usage', { p_user_id: user.id });
 
         if (usageError) {
             console.error('Failed to get updated scan usage', usageError);
@@ -379,7 +445,7 @@ const useStore = create((set, get) => ({
 
         // Streak updates back to users table
         const { data } = await supabase
-            .from('users')
+            .from('aigirl_users')
             .update({
                 current_streak: newStreak,
                 level_xp: newXp,
@@ -695,7 +761,7 @@ const useStore = create((set, get) => ({
                     });
                     // Backend did NOT increment usage (edge function failed/returned fallback).
                     // Refresh local usage data + update XP/streak — do NOT increment scan count.
-                    const { data: refreshedUsage } = await supabase.rpc('get_scan_usage', { p_user_id: user.id });
+                    const { data: refreshedUsage } = await supabase.rpc('get_aigirl_scan_usage', { p_user_id: user.id });
                     if (profile) {
                         const today = new Date().toISOString().split('T')[0];
                         const freshXp = (profile.level_xp || 0) + 10;
@@ -706,7 +772,7 @@ const useStore = create((set, get) => ({
                             freshStreak = profile.last_scan_date === yesterday.toISOString().split('T')[0] ? freshStreak + 1 : 1;
                         }
                         const { data: updatedProfile } = await supabase
-                            .from('users')
+                            .from('aigirl_users')
                             .update({ current_streak: freshStreak, level_xp: freshXp })
                             .eq('id', user.id)
                             .select()

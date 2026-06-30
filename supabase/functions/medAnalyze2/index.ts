@@ -216,18 +216,18 @@ async function refundScanCredit(userId: string, isTester: boolean): Promise<void
         if (!serviceKey || !supabaseUrl) return
 
         const adminClient = createClient(supabaseUrl, serviceKey)
-        const { data: usage } = await adminClient.from('scan_usage')
+        const { data: usage } = await adminClient.from('aigirl_scan_usage')
             .select('daily_scans, weekly_scans, monthly_scans')
             .eq('user_id', userId).single()
 
         if (usage) {
             const newDaily = Math.max(0, usage.daily_scans - 1)
-            await adminClient.from('scan_usage').update({
+            await adminClient.from('aigirl_scan_usage').update({
                 daily_scans: newDaily,
                 weekly_scans: Math.max(0, usage.weekly_scans - 1),
                 monthly_scans: Math.max(0, usage.monthly_scans - 1)
             }).eq('user_id', userId)
-            await adminClient.from('users').update({ daily_scans: newDaily }).eq('id', userId)
+            await adminClient.from('aigirl_users').update({ daily_scans: newDaily }).eq('id', userId)
             console.log(`🔄 Refunded scan credit for user ${userId}`)
         }
     } catch (err) {
@@ -242,7 +242,7 @@ async function refundScanCredit(userId: string, isTester: boolean): Promise<void
 async function fetchUserHealthProfile(supabase: any, userId: string): Promise<any | null> {
     try {
         const { data, error } = await supabase
-            .from('users')
+            .from('aigirl_users')
             .select('health_preferences')
             .eq('id', userId)
             .single()
@@ -381,7 +381,7 @@ serve(async (req) => {
         let USE_GEMINI = true;
         if (adminClient) {
             try {
-                const { data: settings } = await adminClient.from('app_settings').select('use_gemini').limit(1).single();
+                const { data: settings } = await adminClient.from('aigirl_app_settings').select('use_gemini').limit(1).single();
                 if (settings && typeof settings.use_gemini === 'boolean') {
                     USE_GEMINI = settings.use_gemini;
                 }
@@ -392,7 +392,7 @@ serve(async (req) => {
 
         // ── Rate Limiting (uses scan_usage — document analysis is expensive like scans) ──
         if (userId !== 'anonymous' && !isTester) {
-            const { error: usageError } = await supabase.rpc('increment_scan_usage', { p_user_id: userId })
+            const { error: usageError } = await supabase.rpc('increment_aigirl_scan_usage', { p_user_id: userId })
             if (usageError) {
                 if (usageError.message?.includes('RATE_LIMIT_EXCEEDED') || usageError.message?.includes('Limit')) {
                     return new Response(JSON.stringify({

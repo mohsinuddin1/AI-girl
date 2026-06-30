@@ -1,0 +1,7 @@
+fix change girl UI
+custom mode next to build her
+improve edge function.
+imrpove UI all screen 
+add auth gmail email apple
+revamp DB schema 
+remove not needed function cleaning.

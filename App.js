@@ -23,7 +23,7 @@ if (process.env.SENTRY_DSN) {
 try {
   SplashScreen.preventAutoHideAsync();
 } catch (e) {
-  console.warn('[MedGPT] SplashScreen.preventAutoHideAsync failed:', e?.message);
+  console.warn('[AIGirl] SplashScreen.preventAutoHideAsync failed:', e?.message);
 }
 
 // ── PostHog (lazy + safe) ──
@@ -37,7 +37,7 @@ try {
     PostHogProvider = require('posthog-react-native').PostHogProvider;
   }
 } catch (e) {
-  console.warn('[MedGPT] PostHog setup failed:', e?.message);
+  console.warn('[AIGirl] PostHog setup failed:', e?.message);
 }
 
 // ── Error Boundary (catches rendering crashes that Sentry.wrap hides) ──
@@ -50,7 +50,7 @@ class AppErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
   componentDidCatch(error, errorInfo) {
-    console.error('[MedGPT] RENDER CRASH:', error, errorInfo?.componentStack);
+    console.error('[AIGirl] RENDER CRASH:', error, errorInfo?.componentStack);
   }
   render() {
     if (this.state.hasError) {
@@ -127,7 +127,7 @@ function App() {
       // Hide immediately since we no longer wait for custom fonts
       SplashScreen.hideAsync();
     } catch (e) {
-      console.warn('[MedGPT] SplashScreen.hideAsync failed:', e?.message);
+      console.warn('[AIGirl] SplashScreen.hideAsync failed:', e?.message);
     }
   }, []);
 

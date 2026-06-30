@@ -10,7 +10,7 @@ import { Colors, Radii, Shadows } from '../theme';
 
 const STORE_URLS = {
     ios: 'itms-apps://apps.apple.com/app/id6762176490?action=write-review',
-    android: 'market://details?id=com.medgptai.app',
+    android: 'market://details?id=com.aigirlai.app',
 };
 
 export default function ReviewPromptModal() {
@@ -88,13 +88,13 @@ export default function ReviewPromptModal() {
             } else {
                 const httpUrl = Platform.OS === 'ios'
                     ? 'https://apps.apple.com/app/id6762176490?action=write-review'
-                    : 'https://play.google.com/store/apps/details?id=com.medgptai.app';
+                    : 'https://play.google.com/store/apps/details?id=com.aigirlai.app';
                 await Linking.openURL(httpUrl);
             }
         } catch {
             const httpUrl = Platform.OS === 'ios'
                 ? 'https://apps.apple.com/app/id6762176490?action=write-review'
-                : 'https://play.google.com/store/apps/details?id=com.medgptai.app';
+                : 'https://play.google.com/store/apps/details?id=com.aigirlai.app';
             Linking.openURL(httpUrl).catch(() => {});
         }
     };
@@ -132,7 +132,7 @@ export default function ReviewPromptModal() {
                             <Text style={styles.title}>You're taking care of yourself 💙</Text>
                             <Text style={styles.description}>
                                 That's already a big step. You've scanned your health reports, asked real questions, and taken your well-being seriously.{'\n\n'}
-                                Would you help others discover MedGPT too?
+                                Would you help others discover AIGirl too?
                             </Text>
 
                             {/* Star Rating */}
@@ -190,7 +190,7 @@ export default function ReviewPromptModal() {
                             </Animated.Text>
                             <Animated.Text entering={FadeInDown.delay(300)} style={styles.description}>
                                 We're a small team building something we truly believe in — an AI that puts your health first.{'\n\n'}
-                                A quick review on the {Platform.OS === 'ios' ? 'App Store' : 'Play Store'} helps more people like you discover MedGPT. It takes 10 seconds.
+                                A quick review on the {Platform.OS === 'ios' ? 'App Store' : 'Play Store'} helps more people like you discover AIGirl. It takes 10 seconds.
                             </Animated.Text>
 
                             <Animated.View entering={FadeInDown.delay(400)} style={{ width: '100%' }}>

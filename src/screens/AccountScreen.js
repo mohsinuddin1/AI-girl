@@ -22,7 +22,7 @@ export default function AccountScreen({ navigation }) {
                     onPress: async () => {
                         posthog.capture('account deletion started');
                         try {
-                            await supabase?.rpc('delete_user_account');
+                            await supabase?.rpc('aigirl_delete_user_account');
                             posthog.capture('account deletion succeeded');
                             await signOut();
                             Alert.alert('Account Deleted', 'Your account has been successfully removed.');
@@ -77,7 +77,7 @@ export default function AccountScreen({ navigation }) {
                 <Text style={styles.sectionTitle}>SUBSCRIPTION</Text>
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Manage Subscription</Text>
-                    <Text style={styles.cardDesc}>View your current plan, upgrade to Pro, or manage your MedGPT subscription.</Text>
+                    <Text style={styles.cardDesc}>View your current plan, upgrade to Pro, or manage your AIGirl subscription.</Text>
                     <TouchableOpacity style={[styles.button, { backgroundColor: '#f1f5f9' }]} onPress={handleManageSubscription}>
                         <Text style={[styles.buttonText, { color: '#0f172a' }]}>Manage Subscriptions</Text>
                     </TouchableOpacity>

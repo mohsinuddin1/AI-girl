@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY = 'medgpt_successful_scans';
-const SHOWN_KEY = 'medgpt_review_shown';
+const KEY = 'aigirl_successful_scans';
+const SHOWN_KEY = 'aigirl_review_shown';
 
 /**
  * Call after every successful scan save.

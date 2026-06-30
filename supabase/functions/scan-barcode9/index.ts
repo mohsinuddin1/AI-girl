@@ -590,7 +590,7 @@ function computeGrade(score: number, hasUserAllergen: boolean = false): string {
 
 async function fetchUserHealthProfile(supabase: any, userId: string) {
     try {
-        const { data, error } = await supabase.from('users').select('health_preferences').eq('id', userId).single()
+        const { data, error } = await supabase.from('aigirl_users').select('health_preferences').eq('id', userId).single()
         if (error || !data?.health_preferences) return null
         const p = data.health_preferences
         return { diseases: p.diseases || [], allergies: p.allergies || [], goals: p.goals || [] }
@@ -1410,18 +1410,18 @@ async function refundScanCredit(userId: string, isTester: boolean): Promise<void
         if (!serviceKey || !SUPABASE_URL) return
 
         const adminClient = createClient(SUPABASE_URL, serviceKey)
-        const { data: usage } = await adminClient.from('scan_usage')
+        const { data: usage } = await adminClient.from('aigirl_scan_usage')
             .select('daily_scans, weekly_scans, monthly_scans')
             .eq('user_id', userId).single()
 
         if (usage) {
             const newDaily = Math.max(0, usage.daily_scans - 1)
-            await adminClient.from('scan_usage').update({
+            await adminClient.from('aigirl_scan_usage').update({
                 daily_scans: newDaily,
                 weekly_scans: Math.max(0, usage.weekly_scans - 1),
                 monthly_scans: Math.max(0, usage.monthly_scans - 1)
             }).eq('user_id', userId)
-            await adminClient.from('users').update({ daily_scans: newDaily }).eq('id', userId)
+            await adminClient.from('aigirl_users').update({ daily_scans: newDaily }).eq('id', userId)
             console.log(`🔄 Refunded scan credit for user ${userId}`)
         }
     } catch (err) {
@@ -1482,7 +1482,7 @@ serve(async (req) => {
         let FREE_TIER_ENABLED = true;
         
         // Fetch app_settings to check high_traffic_mode
-        const { data: appSettings } = await supabase.from('app_settings').select('high_traffic_mode').limit(1).single();
+        const { data: appSettings } = await supabase.from('aigirl_app_settings').select('high_traffic_mode').limit(1).single();
         if (appSettings && appSettings.high_traffic_mode) {
             FREE_TIER_ENABLED = false;
         }
@@ -1490,7 +1490,7 @@ serve(async (req) => {
         if (!FREE_TIER_ENABLED && !isTester) {
             let isPro = false;
             if (userId !== 'anonymous') {
-                const { data: userRecord } = await supabase.from('users').select('is_pro').eq('id', userId).single();
+                const { data: userRecord } = await supabase.from('aigirl_users').select('is_pro').eq('id', userId).single();
                 isPro = !!userRecord?.is_pro;
             }
             if (!isPro) {
@@ -1502,7 +1502,7 @@ serve(async (req) => {
 
         // ── STRICT RATE LIMITING ──
         if (userId !== 'anonymous' && !isTester) {
-            const { error: usageError } = await supabase.rpc('increment_scan_usage', { p_user_id: userId });
+            const { error: usageError } = await supabase.rpc('increment_aigirl_scan_usage', { p_user_id: userId });
             if (usageError) {
                 if (usageError.message?.includes('RATE_LIMIT_EXCEEDED') || usageError.message?.includes('Limit')) {
                     return new Response(JSON.stringify({ upgradeRequired: true }), {

@@ -37,7 +37,7 @@ export default function FeedbackScreen({ navigation }) {
 
         setIsSubmitting(true);
         try {
-            const { error } = await supabase.from('feedbacks').insert({
+            const { error } = await supabase.from('aigirl_feedback').insert({
                 user_id: user?.id,
                 email: user?.email,
                 name: user?.user_metadata?.full_name || 'Anonymous',
@@ -54,7 +54,7 @@ export default function FeedbackScreen({ navigation }) {
             
             Alert.alert(
                 'Thank You!',
-                'Your feedback helps us improve MedGPT tremendously.',
+                'Your feedback helps us improve AIGirl tremendously.',
                 [{ text: 'Close', onPress: () => navigation.goBack() }]
             );
         } catch (e) {

@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "MedGPT",
-    "slug": "med-gpt",
+    "name": "AIGirl",
+    "slug": "ai-girl",
     "version": "1.0",
     "orientation": "portrait",
     "icon": "./assets/appIconwhiteBG.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "medgpt",
+    "scheme": "aigirl",
     "splash": {
       "image": "./assets/apptext.png",
       "resizeMode": "contain",
@@ -16,11 +16,11 @@
     "ios": {
       "supportsTablet": false,
       "requireFullScreen": true,
-      "bundleIdentifier": "com.medgptai.app",
+      "bundleIdentifier": "com.aigirlai.app",
       "appleTeamId": "WLYU82D3WY",
       "infoPlist": {
-        "NSCameraUsageDescription": "MedGPT uses the camera to instantly scan medical reports for AI analysis.",
-        "NSPhotoLibraryUsageDescription": "MedGPT needs photo library access to analyze medical reports from your gallery.",
+        "NSCameraUsageDescription": "AIGirl uses the camera to instantly scan medical reports for AI analysis.",
+        "NSPhotoLibraryUsageDescription": "AIGirl needs photo library access to analyze medical reports from your gallery.",
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
@@ -38,7 +38,7 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.medgptai.app",
+      "package": "com.aigirlai.app",
       "permissions": [
         "android.permission.CAMERA",
         "com.android.vending.BILLING",
@@ -62,13 +62,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "MedGPT needs camera access to scan medical reports."
+          "cameraPermission": "AIGirl needs camera access to scan medical reports."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "MedGPT needs photo access to analyze medical reports."
+          "photosPermission": "AIGirl needs photo access to analyze medical reports."
         }
       ],
       [
@@ -95,7 +95,7 @@
         {
           "url": "https://sentry.io/",
           "project": "react-native",
-          "organization": "medgpt"
+          "organization": "aigirl"
         }
       ]
     ],

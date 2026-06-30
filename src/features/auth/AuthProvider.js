@@ -242,7 +242,7 @@ export function AuthProvider({ children }) {
             email,
             password,
             options: {
-                emailRedirectTo: 'medgpt://auth-callback',
+                emailRedirectTo: 'aigirl://auth-callback',
             },
         });
         if (error) throw error;
