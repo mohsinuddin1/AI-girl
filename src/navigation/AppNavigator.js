@@ -13,6 +13,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import ChatScreen from '../screens/ChatScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PersonaSelectScreen from '../screens/PersonaSelectScreen';
+import CustomizePersonaScreen from '../screens/CustomizePersonaScreen';
 import ResultScreen from '../screens/ResultScreen';
 import ScanScreen from '../screens/ScanScreen';
 import PaywallScreen from '../screens/PaywallScreen';
@@ -98,6 +99,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="Chat" component={ChatScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
                     <Stack.Screen name="PersonaSelect" component={PersonaSelectScreen} />
+                    <Stack.Screen name="CustomizePersona" component={CustomizePersonaScreen} />
                     <Stack.Screen
                         name="Result"
                         component={ResultScreen}

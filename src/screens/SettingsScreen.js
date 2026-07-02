@@ -1,23 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image, Alert, Linking, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import useStore from '../store/useStore';
 import { supabase } from '../lib/supabase';
 
 export default function SettingsScreen({ navigation }) {
-    const { user, profile, signOut, isGuestMode, setGuestMode, clearOnboarding, selectedPersona, updateCustomPersona } = useStore();
+    const { user, profile, signOut, isGuestMode, setGuestMode, clearOnboarding, selectedPersona, personas, setSelectedPersona } = useStore();
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
 
-    const updateCustom = (key, value) => {
-        if (!selectedPersona?.personality) return;
-        updateCustomPersona({ personality: { ...selectedPersona.personality, [key]: value } });
-    };
-
-    const updateDemand = (text) => {
-        updateCustomPersona({ extra_demand: text });
+    const handleProfilePress = () => {
+        if (selectedPersona?.id === 'custom' || selectedPersona?.id === 'custom_girl') {
+            navigation.navigate('CustomizePersona');
+        }
     };
 
     const handleSignOut = async () => {
@@ -97,7 +93,11 @@ export default function SettingsScreen({ navigation }) {
                         start={{x: 0, y: 0}} end={{x: 1, y: 0}}
                         style={styles.profileBtnGradient}
                     >
-                        <TouchableOpacity style={styles.profileBtn}>
+                        <TouchableOpacity 
+                            style={styles.profileBtn} 
+                            onPress={handleProfilePress}
+                            activeOpacity={selectedPersona?.id === 'custom' || selectedPersona?.id === 'custom_girl' ? 0.7 : 1}
+                        >
                             <Text style={styles.profileBtnText}>{selectedPersona?.name || 'AIGirl'}'s profile</Text>
                         </TouchableOpacity>
                     </LinearGradient>
@@ -106,58 +106,15 @@ export default function SettingsScreen({ navigation }) {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>AI Persona</Text>
                     <View style={styles.sectionCard}>
-                        <SettingRow label="Chat with another girl" onPress={() => navigation.navigate('PersonaSelect')} />
+                        <SettingRow label="Change AI Girl" onPress={() => navigation.navigate('PersonaSelect')} rightText={selectedPersona?.name || ''} />
+                        {(selectedPersona?.id === 'custom' || selectedPersona?.id === 'custom_girl') && (
+                            <>
+                                <View style={styles.divider} />
+                                <SettingRow label="Customize Persona" onPress={() => navigation.navigate('CustomizePersona')} />
+                            </>
+                        )}
                     </View>
                 </View>
-
-                {selectedPersona?.name === 'Custom Girl' && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Customize Behavior</Text>
-                        <View style={styles.sectionCard}>
-                            <View style={styles.customContainer}>
-                                <Text style={styles.customLabel}>Flirty vs Shy</Text>
-                                <Slider
-                                    style={styles.slider}
-                                    minimumValue={0}
-                                    maximumValue={1}
-                                    value={selectedPersona.personality?.shyFlirty || 0.5}
-                                    onSlidingComplete={(val) => updateCustom('shyFlirty', val)}
-                                    minimumTrackTintColor="#D586F9"
-                                    maximumTrackTintColor="#555"
-                                />
-                                <Text style={styles.customLabel}>Pessimistic vs Optimistic</Text>
-                                <Slider
-                                    style={styles.slider}
-                                    minimumValue={0}
-                                    maximumValue={1}
-                                    value={selectedPersona.personality?.pessOpt || 0.5}
-                                    onSlidingComplete={(val) => updateCustom('pessOpt', val)}
-                                    minimumTrackTintColor="#D586F9"
-                                    maximumTrackTintColor="#555"
-                                />
-                                <Text style={styles.customLabel}>Ordinary vs Mysterious</Text>
-                                <Slider
-                                    style={styles.slider}
-                                    minimumValue={0}
-                                    maximumValue={1}
-                                    value={selectedPersona.personality?.ordMyst || 0.5}
-                                    onSlidingComplete={(val) => updateCustom('ordMyst', val)}
-                                    minimumTrackTintColor="#D586F9"
-                                    maximumTrackTintColor="#555"
-                                />
-                                <Text style={[styles.customLabel, { marginTop: 12 }]}>Extra Demand</Text>
-                                <TextInput
-                                    style={styles.demandInput}
-                                    multiline
-                                    placeholder="Type specific instructions..."
-                                    placeholderTextColor="#888"
-                                    defaultValue={selectedPersona.extra_demand || ''}
-                                    onEndEditing={(e) => updateDemand(e.nativeEvent.text)}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                )}
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Account</Text>
@@ -246,11 +203,6 @@ const styles = StyleSheet.create({
     rightContent: { flexDirection: 'row', alignItems: 'center' },
     rightText: { color: '#ccc', fontSize: 15, marginRight: 8 },
     divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginLeft: 16 },
-    
-    customContainer: { padding: 16 },
-    customLabel: { color: '#fff', fontSize: 14, fontWeight: '500', marginBottom: 8 },
-    slider: { width: '100%', height: 40, marginBottom: 16 },
-    demandInput: { backgroundColor: 'rgba(0,0,0,0.2)', color: '#fff', borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: 'top' },
     
     versionText: { color: '#888', textAlign: 'center', fontSize: 13, marginTop: 16 }
 });

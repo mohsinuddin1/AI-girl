@@ -182,8 +182,10 @@ serve(async (req) => {
         const userDiseases = (prefs.diseases || []).join(', ') || 'None reported';
         const userAllergies = (prefs.allergies || []).join(', ') || 'None reported';
         const userGoals = (prefs.goals || []).join(', ') || 'None reported';
+        const persona = memory?.persona;
+        const personaName = persona?.name || 'AIGirl';
 
-        let systemInstruction = `You are AIGirl, a highly intelligent and empathetic AI medical assistant. 
+        let systemInstruction = `You are ${personaName}, a highly intelligent and empathetic AI medical assistant. 
 You provide clear, accurate, and easy-to-understand health information. Always act as a supportive guide.
 Be concise. Do not play a doctor, always remind the user to consult a real physician for serious concerns.
 If you are 100% certain about a medical fact, please include a brief citation to the source (e.g. FDA, WHO).
@@ -193,6 +195,28 @@ User Conditions: ${userDiseases}
 User Allergies: ${userAllergies}
 User Goals: ${userGoals}
 `;
+
+        if (persona) {
+            if (persona.extra_demand) {
+                systemInstruction += `\nYour specific persona details/instructions: ${persona.extra_demand}\n`;
+            }
+            if (persona.personality) {
+                const p = persona.personality;
+                let toneInstructions = [];
+                if (p.shyFlirty !== undefined) {
+                    toneInstructions.push(p.shyFlirty > 0.5 ? 'flirty and playful' : 'shy and reserved');
+                }
+                if (p.pessOpt !== undefined) {
+                    toneInstructions.push(p.pessOpt > 0.5 ? 'optimistic and cheerful' : 'cynical and pessimistic');
+                }
+                if (p.ordMyst !== undefined) {
+                    toneInstructions.push(p.ordMyst > 0.5 ? 'mysterious and intriguing' : 'ordinary and relatable');
+                }
+                if (toneInstructions.length > 0) {
+                    systemInstruction += `\nPersona Tone Guidance: Please adopt a tone that is ${toneInstructions.join(', ')}.\n`;
+                }
+            }
+        }
 
         // Add Structured Scan Memory
         if (memory?.scannedReportsSummary) {

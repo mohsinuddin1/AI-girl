@@ -158,18 +158,26 @@ function SlideName({ userName, setUserName }) {
 
 // Slide 2: Choose Your Girl
 function SlideChooseAvatar({ personas, loading, selectedAvatar, setSelectedAvatar }) {
+    const firstLine = selectedAvatar?.extra_demand ? selectedAvatar.extra_demand.split('.')[0] + '.' : '';
+
     return (
         <View style={styles.slideFull}>
             <Animated.Text entering={FadeInDown} style={styles.titleAbsolute}>
                 Choose your Girl
             </Animated.Text>
             
+            {!!firstLine && selectedAvatar?.id !== 'custom' && (
+                <Animated.View entering={FadeInDown.delay(200)} style={styles.personalityBox}>
+                    <Text style={styles.personalityText}>{firstLine}</Text>
+                </Animated.View>
+            )}
+
             <View style={styles.carouselContainer}>
                 {loading ? (
                     <ActivityIndicator size="large" color={THEME.primary} />
                 ) : (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, alignItems: 'center', gap: 16 }}>
-                        {personas.map((avatar) => {
+                        {personas.filter(a => a.name !== 'Custom Girl' && a.id !== 'custom_girl').map((avatar) => {
                             const isSelected = selectedAvatar?.id === avatar.id;
                             return (
                                 <TouchableOpacity 
@@ -209,7 +217,7 @@ function SlidePersonality({ traits, setTraits, extraDemand, setExtraDemand, sele
                 <View style={styles.customContainer}>
                     <Text style={styles.sectionLabel}>Select Image</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, marginBottom: 24 }}>
-                        {personas.map((p) => (
+                        {personas.filter(p => p.name !== 'Custom Girl' && p.id !== 'custom_girl').map((p) => (
                             <TouchableOpacity 
                                 key={p.id} 
                                 onPress={() => setSelectedAvatar({ ...selectedAvatar, image_url: p.image_url })}
@@ -526,7 +534,7 @@ export default function OnboardingScreen() {
     if (currentSlide === 4) displayStep = selectedAvatar?.id !== 'custom' ? 3 : 5;
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <View style={styles.container}>
             {currentSlide === 0 ? (
                 <Image source={require('../../assets/appinside1.png')} style={styles.fullBgImage} />
             ) : (
@@ -537,28 +545,32 @@ export default function OnboardingScreen() {
             
             <LinearGradient colors={['transparent', 'rgba(4,11,22,0.9)', THEME.bg]} style={styles.globalBottomGradient} />
             
-            {!isAutoSlide && (
-                <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-                    <TouchableOpacity onPress={handleBack} style={{ padding: 8, opacity: currentSlide === 0 ? 0 : 1 }} disabled={currentSlide === 0}>
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={styles.stepIndicator}>Step {displayStep} / {selectedAvatar?.id !== 'custom' ? 4 : 6}</Text>
-                    <View style={{ width: 40 }} />
-                </View>
-            )}
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                {!isAutoSlide && (
+                    <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+                        <TouchableOpacity onPress={handleBack} style={{ padding: 8, opacity: currentSlide === 0 ? 0 : 1 }} disabled={currentSlide === 0}>
+                            <Ionicons name="arrow-back" size={24} color="#fff" />
+                        </TouchableOpacity>
+                        <Text style={styles.stepIndicator}>Step {displayStep} / {selectedAvatar?.id !== 'custom' ? 4 : 6}</Text>
+                        <View style={{ width: 40 }} />
+                    </View>
+                )}
 
-            <View style={{ flex: 1 }}>
-                {renderSlide()}
-            </View>
-
-            {!isAutoSlide && (
-                <View style={[styles.bottomControls, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-                    <TouchableOpacity onPress={handleNext} style={styles.primaryBtn} activeOpacity={0.8}>
-                        <Text style={styles.primaryBtnText}>Continue</Text>
-                    </TouchableOpacity>
+                <View style={{ flex: 1 }}>
+                    {renderSlide()}
                 </View>
-            )}
-        </KeyboardAvoidingView>
+
+                {!isAutoSlide && (
+                    <View style={[styles.bottomControls, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+                        <TouchableOpacity onPress={handleNext} style={styles.primaryBtn} activeOpacity={0.8}>
+                            <Text style={styles.primaryBtnText}>
+                                {currentSlide === 1 && selectedAvatar?.id === 'custom' ? 'Make Custom AI Girl' : 'Continue'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 
@@ -583,11 +595,14 @@ const styles = StyleSheet.create({
     globalBottomGradient: { position: 'absolute', left: 0, right: 0, bottom: 0, height: height * 0.6 },
     darkOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
     
+    personalityBox: { position: 'absolute', bottom: 170, left: 24, right: 24, backgroundColor: 'rgba(0,0,0,0.6)', padding: 18, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+    personalityText: { color: 'rgba(255,255,255,0.95)', fontSize: 15, textAlign: 'center', lineHeight: 22, fontWeight: '500' },
+
     carouselContainer: { position: 'absolute', bottom: 40, left: 0, right: 0 },
     addBtn: { width: 64, height: 64, borderRadius: 32, backgroundColor: THEME.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: THEME.bg },
     proBadge: { position: 'absolute', top: -5, right: -5, backgroundColor: '#ef4444', borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
     avatarThumbWrap: { width: 64, height: 64 * (16/9), borderRadius: 16, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent', opacity: 0.6 },
-    avatarThumbSelected: { borderColor: THEME.accent, opacity: 1 },
+    avatarThumbSelected: { borderColor: THEME.primary, opacity: 1, shadowColor: THEME.primary, shadowOffset: {width: 0, height: 0}, shadowOpacity: 0.5, shadowRadius: 10, elevation: 5 },
     avatarThumb: { width: '100%', height: '100%', resizeMode: 'cover' },
 
     customContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingBottom: 24, paddingTop: 60 },

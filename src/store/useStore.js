@@ -100,34 +100,54 @@ const useStore = create((set, get) => ({
     fetchPersonas: async () => {
         try {
             const { data, error } = await supabase.from('ai_personas').select('*').eq('is_visible', true).order('created_at', { ascending: true });
-            if (!error && data) {
-                set({ personas: data });
-                // If we have a saved ID, select it
-                const savedId = await AsyncStorage.getItem('purescan_selected_persona_id');
-                
-                if (savedId === 'custom') {
-                    const customDataStr = await AsyncStorage.getItem('purescan_custom_persona_data');
-                    if (customDataStr) {
-                        try {
-                            const customData = JSON.parse(customDataStr);
-                            set({ selectedPersona: customData });
-                            return;
-                        } catch (e) {
-                            console.error('Failed to parse custom persona data', e);
-                        }
+            
+            let finalPersonas = [];
+            if (!error && data && data.length > 0) {
+                finalPersonas = data;
+            } else {
+                finalPersonas = [
+                    { id: 'fb1', name: 'Luna', image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=540&h=960&fit=crop', personality: {shyFlirty: 0.8, pessOpt: 0.6, ordMyst: 0.9}, extra_demand: 'I love talking about the universe and stars.' },
+                    { id: 'fb2', name: 'Emma', image_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=540&h=960&fit=crop', personality: {shyFlirty: 0.4, pessOpt: 0.9, ordMyst: 0.3}, extra_demand: 'I am very practical and optimistic.' },
+                    { id: 'custom_girl', name: 'Custom Girl', image_url: 'https://images.unsplash.com/photo-1525875975471-999f65706a10?w=540&h=960&fit=crop', personality: {shyFlirty: 0.5, pessOpt: 0.5, ordMyst: 0.5}, extra_demand: 'I am a custom AI persona.' }
+                ];
+            }
+            
+            set({ personas: finalPersonas });
+            
+            // If we have a saved ID, select it
+            const savedId = await AsyncStorage.getItem('purescan_selected_persona_id');
+            
+            if (savedId === 'custom') {
+                const customDataStr = await AsyncStorage.getItem('purescan_custom_persona_data');
+                if (customDataStr) {
+                    try {
+                        const customData = JSON.parse(customDataStr);
+                        set({ selectedPersona: customData });
+                        return;
+                    } catch (e) {
+                        console.error('Failed to parse custom persona data', e);
                     }
                 }
-                
-                if (savedId) {
-                    const found = data.find(p => p.id === savedId);
-                    if (found) set({ selectedPersona: found });
-                } else if (data.length > 0) {
-                    // Default to first persona
-                    set({ selectedPersona: data[0] });
-                }
+            }
+            
+            if (savedId) {
+                const found = finalPersonas.find(p => p.id === savedId);
+                if (found) set({ selectedPersona: found });
+            } else if (finalPersonas.length > 0) {
+                // Default to first persona
+                set({ selectedPersona: finalPersonas[0] });
             }
         } catch (e) {
             console.error('Failed to fetch personas', e);
+            const fallback = [
+                { id: 'fb1', name: 'Luna', image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=540&h=960&fit=crop', personality: {shyFlirty: 0.8, pessOpt: 0.6, ordMyst: 0.9}, extra_demand: 'I love talking about the universe and stars.' },
+                { id: 'fb2', name: 'Emma', image_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=540&h=960&fit=crop', personality: {shyFlirty: 0.4, pessOpt: 0.9, ordMyst: 0.3}, extra_demand: 'I am very practical and optimistic.' },
+                { id: 'custom_girl', name: 'Custom Girl', image_url: 'https://images.unsplash.com/photo-1525875975471-999f65706a10?w=540&h=960&fit=crop', personality: {shyFlirty: 0.5, pessOpt: 0.5, ordMyst: 0.5}, extra_demand: 'I am a custom AI persona.' }
+            ];
+            set({ personas: fallback });
+            if (!get().selectedPersona) {
+                set({ selectedPersona: fallback[0] });
+            }
         }
     },
     
