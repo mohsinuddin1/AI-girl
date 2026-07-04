@@ -87,7 +87,7 @@ export default function SettingsScreen({ navigation }) {
                 )}
 
                 <View style={styles.profileSection}>
-                    <Image source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/appinside1.png')} style={styles.profileImage} />
+                    <Image source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/logo.png')} style={styles.profileImage} />
                     <LinearGradient
                         colors={['#8A73F7', '#D586F9']}
                         start={{x: 0, y: 0}} end={{x: 1, y: 0}}

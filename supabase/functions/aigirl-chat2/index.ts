@@ -135,18 +135,21 @@ serve(async (req) => {
         const SUPABASE_ANON_KEY = Deno.env.get('MED_SUPABASE_ANON_KEY')
         const authHeader = req.headers.get('Authorization')
         
+        let supabaseClient: any = null;
+        let authUser: any = null;
+
         let USE_GEMINI = false; // Default to Llama (Groq)
         if (Deno.env.get('AI_PROVIDER') === 'GEMINI') {
             USE_GEMINI = true;
         }
         if (SUPABASE_URL && SUPABASE_ANON_KEY && authHeader) {
-            const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 global: { headers: { Authorization: authHeader } }
             })
             
             // Fetch AI provider setting
             try {
-                const { data: settings } = await supabase.from('aigirl_app_settings').select('use_gemini_chats').limit(1).single();
+                const { data: settings } = await supabaseClient.from('aigirl_app_settings').select('use_gemini_chats').limit(1).single();
                 if (settings && typeof settings.use_gemini_chats === 'boolean') {
                     USE_GEMINI = settings.use_gemini_chats;
                 }
@@ -154,11 +157,12 @@ serve(async (req) => {
                 console.warn('Failed to fetch use_gemini_chats from app_settings, using fallback', e);
             }
 
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data: { user } } = await supabaseClient.auth.getUser()
+            authUser = user;
             
-            if (user) {
+            if (authUser) {
                 // Increment chat usage / Check rate limits
-                const { error: usageError } = await supabase.rpc('increment_aigirl_chat_usage', { p_user_id: user.id })
+                const { error: usageError } = await supabaseClient.rpc('increment_aigirl_chat_usage', { p_user_id: authUser.id })
                 if (usageError) {
                     if (usageError.message?.includes('RATE_LIMIT_EXCEEDED') || usageError.message?.includes('Limit')) {
                         return new Response(JSON.stringify({ 
@@ -177,28 +181,18 @@ serve(async (req) => {
         const GEMINI_API_KEY = rotateKey(geminiKeys)
 
         // ── Build System Instruction (Long Term Memory) ──
-        const prefs = memory?.healthPreferences || {};
         const userName = memory?.userName || 'User';
-        const userDiseases = (prefs.diseases || []).join(', ') || 'None reported';
-        const userAllergies = (prefs.allergies || []).join(', ') || 'None reported';
-        const userGoals = (prefs.goals || []).join(', ') || 'None reported';
         const persona = memory?.persona;
         const personaName = persona?.name || 'AIGirl';
+        const userMemoryTier1 = memory?.userMemory || 'None';
+        const longTermFactsTier2 = memory?.longTermFacts || 'None';
 
-        let systemInstruction = `You are ${personaName}, a highly intelligent and empathetic AI medical assistant. 
-You provide clear, accurate, and easy-to-understand health information. Always act as a supportive guide.
-Be concise. Do not play a doctor, always remind the user to consult a real physician for serious concerns.
-If you are 100% certain about a medical fact, please include a brief citation to the source (e.g. FDA, WHO).
-
-User Name: ${userName}
-User Conditions: ${userDiseases}
-User Allergies: ${userAllergies}
-User Goals: ${userGoals}
-`;
+        let systemInstruction = `[CHARACTER PROFILE]
+You are ${personaName}.`;
 
         if (persona) {
             if (persona.extra_demand) {
-                systemInstruction += `\nYour specific persona details/instructions: ${persona.extra_demand}\n`;
+                systemInstruction += `\n${persona.extra_demand}`;
             }
             if (persona.personality) {
                 const p = persona.personality;
@@ -213,33 +207,25 @@ User Goals: ${userGoals}
                     toneInstructions.push(p.ordMyst > 0.5 ? 'mysterious and intriguing' : 'ordinary and relatable');
                 }
                 if (toneInstructions.length > 0) {
-                    systemInstruction += `\nPersona Tone Guidance: Please adopt a tone that is ${toneInstructions.join(', ')}.\n`;
+                    systemInstruction += `\nPersonality Tone: ${toneInstructions.join(', ')}`;
                 }
             }
         }
 
-        // Add Structured Scan Memory
-        if (memory?.scannedReportsSummary) {
-            let parsedMemory: any[] = [];
-            try {
-                if (Array.isArray(memory.scannedReportsSummary)) {
-                    parsedMemory = memory.scannedReportsSummary;
-                } else {
-                    parsedMemory = JSON.parse(memory.scannedReportsSummary);
-                }
-                
-                if (Array.isArray(parsedMemory) && parsedMemory.length > 0) {
-                    systemInstruction += `\n\n[LONG-TERM MEDICAL MEMORY (From Scans)]\n`;
-                    systemInstruction += JSON.stringify(parsedMemory, null, 2);
-                    systemInstruction += `\n\nUse the above medical memory as context to understand the user's current health status and recent lab/report findings.`;
-                }
-            } catch (e) {
-                // Fallback to legacy string memory if parsing fails
-                if (typeof memory.scannedReportsSummary === 'string' && memory.scannedReportsSummary.length > 5) {
-                    systemInstruction += `\n\n[LEGACY MEDICAL MEMORY]\n${memory.scannedReportsSummary}`;
-                }
-            }
-        }
+        systemInstruction += `
+
+[USER'S PERSONAL NOTES]
+${userMemoryTier1}
+
+[AI'S KNOWLEDGE ABOUT USER]
+${longTermFactsTier2}
+
+[CONVERSATION RULES]
+1. Stay in character at all times. Never refer to yourself as an AI or assistant.
+2. Keep responses short, natural, and conversational — like texting.
+3. Show your personality through your speaking style, emojis, and tone.
+4. Use the knowledge you have about the user to make the conversation feel personal and warm.
+5. If the user asks something you don't know, be honest and playful about it.`;
 
         // ── Call AI ──
         let aiResponseText = "";
@@ -265,10 +251,9 @@ User Goals: ${userGoals}
             }
         }
 
-        // Add generalized citations if no citations were returned
-        const hasCitations = /citation|source|http|www\./i.test(aiResponseText);
-        if (!hasCitations) {
-            aiResponseText += "\n\n**General References:**\n- World Health Organization (WHO) - General Wellness Guidelines\n- National Institutes of Health (NIH) - Health Information\n- Mayo Clinic - Patient Care & Health Information";
+        if (authUser && supabaseClient) {
+            // Increment message count for condensation
+            supabaseClient.rpc('increment_message_count', { p_user_id: authUser.id }).catch((e: any) => console.error('Failed to increment message count', e));
         }
 
         return new Response(

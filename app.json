@@ -4,23 +4,23 @@
     "slug": "ai-girl",
     "version": "1.0",
     "orientation": "portrait",
-    "icon": "./assets/appIconwhiteBG.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "aigirl",
     "splash": {
-      "image": "./assets/apptext.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": false,
       "requireFullScreen": true,
-      "bundleIdentifier": "com.aigirlai.app",
+      "bundleIdentifier": "com.aigirl.app",
       "appleTeamId": "WLYU82D3WY",
       "infoPlist": {
-        "NSCameraUsageDescription": "AIGirl uses the camera to instantly scan medical reports for AI analysis.",
-        "NSPhotoLibraryUsageDescription": "AIGirl needs photo library access to analyze medical reports from your gallery.",
+        "NSCameraUsageDescription": "AIGirl uses the camera to capture photos and analyze them.",
+        "NSPhotoLibraryUsageDescription": "AIGirl needs photo library access to analyze images from your gallery.",
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
@@ -33,12 +33,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/appIconwhiteBG.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.aigirlai.app",
+      "package": "com.aigirl.app",
       "permissions": [
         "android.permission.CAMERA",
         "com.android.vending.BILLING",
@@ -62,13 +62,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "AIGirl needs camera access to scan medical reports."
+          "cameraPermission": "AIGirl needs camera access to capture photos."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "AIGirl needs photo access to analyze medical reports."
+          "photosPermission": "AIGirl needs photo access to analyze images."
         }
       ],
       [

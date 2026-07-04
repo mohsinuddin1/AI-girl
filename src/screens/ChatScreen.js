@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, TouchableWithoutFeedback, Keyboard, Image, Alert, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, TouchableWithoutFeedback, Keyboard, Image, Alert, ImageBackground, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Markdown from 'react-native-markdown-display';
 import * as Clipboard from 'expo-clipboard';
@@ -88,8 +88,8 @@ export default function ChatScreen({ route, navigation }) {
 
     const handleOpenMemory = () => {
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         setMemoryText(profile?.memory || '');
         setShowMemoryModal(true);
@@ -130,9 +130,20 @@ export default function ChatScreen({ route, navigation }) {
 
         const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardVisible(true));
         const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardVisible(false));
+        
+        // Memory Condensation AppState listener
+        const appStateSub = AppState.addEventListener('change', nextAppState => {
+            if (nextAppState === 'background' || nextAppState === 'inactive') {
+                ChatService.triggerCondenseMemory(false).catch(() => {});
+            }
+        });
+
         return () => {
             showSub.remove();
             hideSub.remove();
+            appStateSub.remove();
+            // Trigger memory condensation when leaving the chat screen
+            ChatService.triggerCondenseMemory(false).catch(() => {});
         };
     }, []);
 
@@ -199,8 +210,8 @@ export default function ChatScreen({ route, navigation }) {
 
     const processDocumentAndChat = async (uri, mimeType, name, isImage) => {
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         if (isProcessingRef.current) return;
         if (!uri) {
@@ -283,8 +294,8 @@ export default function ChatScreen({ route, navigation }) {
 
     const handleSend = async () => {
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         if (!inputText.trim() || isProcessingRef.current) return;
         
@@ -329,8 +340,8 @@ export default function ChatScreen({ route, navigation }) {
     const handleUploadFile = async () => {
         setShowUploadModal(false);
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         if (isProcessingRef.current) return;
         setTimeout(async () => {
@@ -365,8 +376,8 @@ export default function ChatScreen({ route, navigation }) {
     const handleGallery = async () => {
         setShowUploadModal(false);
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         if (isProcessingRef.current) return;
         setTimeout(async () => {
@@ -398,8 +409,8 @@ export default function ChatScreen({ route, navigation }) {
     const handleCapture = () => {
         setShowUploadModal(false);
         if (isGuestMode && !user) {
-            setShowGuestAuth(true);
-            return;
+            // setShowGuestAuth(true);
+            // return;
         }
         navigation.navigate('Scan');
     };
@@ -412,7 +423,7 @@ export default function ChatScreen({ route, navigation }) {
     const inputPaddingBottom = keyboardVisible ? 12 : Math.max(16, bottomInset);
 
     return (
-        <ImageBackground source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/appinside1.png')} style={{ flex: 1 }} resizeMode="cover">
+        <ImageBackground source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/logo.png')} style={{ flex: 1 }} resizeMode="cover">
             <SafeAreaView style={styles.safeArea}>
                 <KeyboardAvoidingView 
                     style={styles.keyboardAvoid} 
@@ -428,7 +439,7 @@ export default function ChatScreen({ route, navigation }) {
                             
                             <View style={[styles.avatarMini, { overflow: 'hidden', backgroundColor: '#555' }]}>
                                 <Image 
-                                    source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/appinside1.png')} 
+                                    source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/logo.png')} 
                                     style={{ width: '100%', height: '200%', position: 'absolute', top: 0 }} 
                                     resizeMode="cover" 
                                 />

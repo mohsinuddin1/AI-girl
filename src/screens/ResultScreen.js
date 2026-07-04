@@ -231,13 +231,13 @@ const PersonalMascot = ({ grade }) => {
     let message = "";
     
     if (grade === 'A' || grade === 'B') {
-        mascotSource = require('../../assets/mascot_happy.png');
+        mascotSource = require('../../assets/logo.png');
         message = grade === 'A' ? "Excellent choice! This is perfectly safe for you." : "Good find! Overall a safe bet.";
     } else if (grade === 'C') {
-        mascotSource = require('../../assets/mascot_neutral.png');
+        mascotSource = require('../../assets/logo.png');
         message = "A bit of a mixed bag. Check the ingredients below.";
     } else {
-        mascotSource = require('../../assets/mascot_scared.png');
+        mascotSource = require('../../assets/logo.png');
         message = grade === 'D' ? "I'm worried. There are concerning ingredients here!" : "STOP! This is highly hazardous. Do NOT use this.";
     }
 

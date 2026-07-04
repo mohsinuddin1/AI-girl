@@ -8,6 +8,7 @@ import useStore from './src/store/useStore';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import { View, Text, TextInput } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import OfflineBanner from './src/components/OfflineBanner';
 import * as Sentry from '@sentry/react-native';
 
@@ -77,8 +78,27 @@ function AppContent() {
   const responseListener = useRef();
 
   useEffect(() => {
-    checkOnboarding();
-    loadHealthPreferences();
+    const migrateStorage = async () => {
+      try {
+        const migrated = await AsyncStorage.getItem('aigirl_storage_migrated');
+        if (migrated !== 'true') {
+          const keys = await AsyncStorage.getAllKeys();
+          for (const key of keys) {
+            if (key.startsWith('purescan_')) {
+              const val = await AsyncStorage.getItem(key);
+              const newKey = key.replace('purescan_', 'aigirl_');
+              await AsyncStorage.setItem(newKey, val);
+            }
+          }
+          await AsyncStorage.setItem('aigirl_storage_migrated', 'true');
+        }
+      } catch (e) {
+        console.warn('Migration failed', e);
+      }
+      checkOnboarding();
+      loadHealthPreferences();
+    };
+    migrateStorage();
   }, []);
 
   // Initialize notifications when user is authenticated AND profile row exists in DB.

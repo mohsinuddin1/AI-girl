@@ -10,7 +10,7 @@ import { Colors, Radii, Shadows } from '../theme';
 
 const STORE_URLS = {
     ios: 'itms-apps://apps.apple.com/app/id6762176490?action=write-review',
-    android: 'market://details?id=com.aigirlai.app',
+    android: 'market://details?id=com.aigirl.app',
 };
 
 export default function ReviewPromptModal() {
@@ -88,13 +88,13 @@ export default function ReviewPromptModal() {
             } else {
                 const httpUrl = Platform.OS === 'ios'
                     ? 'https://apps.apple.com/app/id6762176490?action=write-review'
-                    : 'https://play.google.com/store/apps/details?id=com.aigirlai.app';
+                    : 'https://play.google.com/store/apps/details?id=com.aigirl.app';
                 await Linking.openURL(httpUrl);
             }
         } catch {
             const httpUrl = Platform.OS === 'ios'
                 ? 'https://apps.apple.com/app/id6762176490?action=write-review'
-                : 'https://play.google.com/store/apps/details?id=com.aigirlai.app';
+                : 'https://play.google.com/store/apps/details?id=com.aigirl.app';
             Linking.openURL(httpUrl).catch(() => {});
         }
     };
@@ -125,7 +125,7 @@ export default function ReviewPromptModal() {
                         <>
                             {/* App Icon */}
                             <Image
-                                source={require('../../assets/appinside1.png')}
+                                source={require('../../assets/logo.png')}
                                 style={styles.appIcon}
                             />
 

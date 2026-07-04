@@ -84,8 +84,8 @@ export function AuthProvider({ children }) {
                 setSession(session);
                 setUser(session.user);
 
-                // Clear guest mode on successful sign-in
-                useStore.getState().setGuestMode(false);
+                // If the user is anonymous, keep guest mode true
+                useStore.getState().setGuestMode(session.user.is_anonymous === true);
 
                 // Identify user in PostHog
                 posthog.identify(session.user.id, {
@@ -265,6 +265,12 @@ export function AuthProvider({ children }) {
         useStore.getState().signOut();
     };
 
+    const signInAnonymously = async () => {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+        return data;
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -272,6 +278,7 @@ export function AuthProvider({ children }) {
                 signInWithApple,
                 signInWithEmail,
                 signUpWithEmail,
+                signInAnonymously,
                 signOut,
                 initialized,
                 purchasesInitialized,

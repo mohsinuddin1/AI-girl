@@ -10,21 +10,20 @@ export const ChatService = {
      * @returns {Promise<Object>} - The AI response
      */
     async sendMessage(message, history = []) {
-        // STM: Keep only the last 5 messages for conversation continuity
-        const slicedHistory = history.slice(-5);
+        // STM: Keep only the last 15 messages for conversation continuity
+        const slicedHistory = history.slice(-15);
         const state = useStore.getState();
-        const { user, profile, healthPreferences, selectedPersona } = state;
+        const { user, profile, selectedPersona, longTermFacts } = state;
         
         // Save user message
         await this.saveMessage('user', message);
         
         // Build the system memory payload
         const memoryPayload = {
-            healthPreferences,
-            scannedReportsSummary: profile?.medical_memory || '', // AI Memory
-            userName: healthPreferences?.name || user?.user_metadata?.full_name || 'Guest',
+            userName: profile?.name || user?.user_metadata?.full_name || 'Guest',
             persona: selectedPersona || null,
             userMemory: profile?.memory || '',
+            longTermFacts: longTermFacts || profile?.long_term_facts || '',
         };
 
         try {
@@ -72,6 +71,9 @@ export const ChatService = {
             if (response.data && response.data.text) {
                 // Save AI response
                 await this.saveMessage('assistant', response.data.text);
+                
+                const currentCount = useStore.getState().messageCountSinceCondense || 0;
+                useStore.setState({ messageCountSinceCondense: currentCount + 1 });
             }
             
             return response.data;
@@ -403,6 +405,31 @@ export const ChatService = {
             return true;
         } catch (error) {
             console.error('Failed to clear chat history:', error);
+            return false;
+        }
+    },
+
+    /**
+     * Trigger background memory condensation.
+     * Called on app state change (leave chat) or manually.
+     */
+    async triggerCondenseMemory(force = false) {
+        const state = useStore.getState();
+        const { user } = state;
+        if (!user || !supabase) return false;
+
+        try {
+            const response = await supabase.functions.invoke('aigirl-condense-memory', {
+                body: { force },
+            });
+            if (response.data && response.data.success && response.data.updated_facts) {
+                // Update local store
+                useStore.setState({ longTermFacts: response.data.updated_facts, messageCountSinceCondense: 0 });
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Failed to trigger memory condensation:', error);
             return false;
         }
     }

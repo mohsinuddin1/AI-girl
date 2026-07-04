@@ -43,6 +43,10 @@ const useStore = create((set, get) => ({
     loading: true,
     appSettings: DEFAULT_APP_SETTINGS,
 
+    // Chat Memory
+    longTermFacts: '',
+    messageCountSinceCondense: 0,
+
     // Scan state
     companionProfile: null,
     scanResult: null,
@@ -66,7 +70,7 @@ const useStore = create((set, get) => ({
     hasAcceptedAITerms: false,
     setAcceptedAITerms: async (val) => {
         try {
-            await AsyncStorage.setItem('purescan_accepted_ai_terms', val ? 'true' : 'false');
+            await AsyncStorage.setItem('aigirl_accepted_ai_terms', val ? 'true' : 'false');
             set({ hasAcceptedAITerms: val });
         } catch (e) {
             console.error('Failed to set accepted AI terms:', e);
@@ -115,10 +119,10 @@ const useStore = create((set, get) => ({
             set({ personas: finalPersonas });
             
             // If we have a saved ID, select it
-            const savedId = await AsyncStorage.getItem('purescan_selected_persona_id');
+            const savedId = await AsyncStorage.getItem('aigirl_selected_persona_id');
             
             if (savedId === 'custom') {
-                const customDataStr = await AsyncStorage.getItem('purescan_custom_persona_data');
+                const customDataStr = await AsyncStorage.getItem('aigirl_custom_persona_data');
                 if (customDataStr) {
                     try {
                         const customData = JSON.parse(customDataStr);
@@ -154,9 +158,9 @@ const useStore = create((set, get) => ({
     setSelectedPersona: async (persona) => {
         set({ selectedPersona: persona });
         if (persona?.id) {
-            await AsyncStorage.setItem('purescan_selected_persona_id', persona.id);
+            await AsyncStorage.setItem('aigirl_selected_persona_id', persona.id);
             if (persona.id === 'custom') {
-                await AsyncStorage.setItem('purescan_custom_persona_data', JSON.stringify(persona));
+                await AsyncStorage.setItem('aigirl_custom_persona_data', JSON.stringify(persona));
             }
         }
     },
@@ -178,11 +182,11 @@ const useStore = create((set, get) => ({
     // Init onboarding check
     checkOnboarding: async () => {
         try {
-            const onboarded = await AsyncStorage.getItem('purescan_onboarded');
-            const mascot = await AsyncStorage.getItem('purescan_show_mascot');
-            const guest = await AsyncStorage.getItem('purescan_guest_mode');
-            const skipModal = await AsyncStorage.getItem('purescan_skip_not_found_modal');
-            const acceptedAITerms = await AsyncStorage.getItem('purescan_accepted_ai_terms');
+            const onboarded = await AsyncStorage.getItem('aigirl_onboarded');
+            const mascot = await AsyncStorage.getItem('aigirl_show_mascot');
+            const guest = await AsyncStorage.getItem('aigirl_guest_mode');
+            const skipModal = await AsyncStorage.getItem('aigirl_skip_not_found_modal');
+            const acceptedAITerms = await AsyncStorage.getItem('aigirl_accepted_ai_terms');
             set({
                 hasSeenOnboarding: onboarded === 'true',
                 onboardingLoaded: true,
@@ -206,7 +210,7 @@ const useStore = create((set, get) => ({
 
     setOnboarded: async () => {
         try {
-            await AsyncStorage.setItem('purescan_onboarded', 'true');
+            await AsyncStorage.setItem('aigirl_onboarded', 'true');
             set({ hasSeenOnboarding: true });
         } catch (e) {
             console.error('Failed to set onboarded state:', e);
@@ -215,7 +219,7 @@ const useStore = create((set, get) => ({
 
     toggleSkipNotFoundModal: async (val) => {
         try {
-            await AsyncStorage.setItem('purescan_skip_not_found_modal', val ? 'true' : 'false');
+            await AsyncStorage.setItem('aigirl_skip_not_found_modal', val ? 'true' : 'false');
             set({ skipNotFoundModal: val });
         } catch (e) {
             console.error('Failed to set skip modal preference:', e);
@@ -223,7 +227,7 @@ const useStore = create((set, get) => ({
     },
     setGuestMode: async (val) => {
         try {
-            await AsyncStorage.setItem('purescan_guest_mode', val ? 'true' : 'false');
+            await AsyncStorage.setItem('aigirl_guest_mode', val ? 'true' : 'false');
         } catch (e) {
             console.error('Failed to save guest mode state:', e);
         }
@@ -234,7 +238,7 @@ const useStore = create((set, get) => ({
 
     clearOnboarding: async () => {
         try {
-            await AsyncStorage.removeItem('purescan_onboarded');
+            await AsyncStorage.removeItem('aigirl_onboarded');
         } catch (e) {
             console.error('Failed to clear onboarding state:', e);
         }
@@ -243,7 +247,7 @@ const useStore = create((set, get) => ({
 
     setShowMascot: async (val) => {
         try {
-            await AsyncStorage.setItem('purescan_show_mascot', val ? 'true' : 'false');
+            await AsyncStorage.setItem('aigirl_show_mascot', val ? 'true' : 'false');
         } catch (e) {
             console.error('Failed to save mascot state:', e);
         }
@@ -252,7 +256,7 @@ const useStore = create((set, get) => ({
 
     setHealthPreferences: async (prefs) => {
         // prefs: { diseases: [], allergies: [], goals: [] }
-        await AsyncStorage.setItem('purescan_health_prefs', JSON.stringify(prefs));
+        await AsyncStorage.setItem('aigirl_health_prefs', JSON.stringify(prefs));
         set({ healthPreferences: prefs });
 
         // Also update local profile cache so HealthPreferencesScreen reads fresh data
@@ -278,7 +282,7 @@ const useStore = create((set, get) => ({
 
     loadHealthPreferences: async () => {
         try {
-            const val = await AsyncStorage.getItem('purescan_health_prefs');
+            const val = await AsyncStorage.getItem('aigirl_health_prefs');
             if (val) {
                 const parsed = JSON.parse(val);
                 // Normalize: ensure it's an object with arrays, not a raw array
@@ -360,6 +364,11 @@ const useStore = create((set, get) => ({
             const finalProfile = { ...currentData, scan_usage: usageData || null };
             set({ profile: finalProfile });
 
+            // Sync long-term facts
+            if (currentData.long_term_facts) {
+                set({ longTermFacts: currentData.long_term_facts, messageCountSinceCondense: currentData.message_count_since_condense || 0 });
+            }
+
             // Fetch app settings for dynamic limits
             const { data: settingsData, error: settingsError } = await supabase
                 .from('aigirl_app_settings')
@@ -378,7 +387,7 @@ const useStore = create((set, get) => ({
             }
             if (hp && typeof hp === 'object' && !Array.isArray(hp)) {
                 set({ healthPreferences: hp });
-                try { await AsyncStorage.setItem('purescan_health_prefs', JSON.stringify(hp)); } catch (e) { /* non-critical */ }
+                try { await AsyncStorage.setItem('aigirl_health_prefs', JSON.stringify(hp)); } catch (e) { /* non-critical */ }
             }
 
             return finalProfile;
@@ -1082,8 +1091,8 @@ const useStore = create((set, get) => ({
 
         // 1. Clear persistence first
         try {
-            await AsyncStorage.removeItem('purescan_onboarded');
-            await AsyncStorage.removeItem('purescan_guest_mode');
+            await AsyncStorage.removeItem('aigirl_onboarded');
+            await AsyncStorage.removeItem('aigirl_guest_mode');
             console.log('Onboarding status cleared');
         } catch (e) {
             console.error('Error clearing onboarding status:', e);
@@ -1097,6 +1106,8 @@ const useStore = create((set, get) => ({
             hasSeenOnboarding: false,
             isGuestMode: false,
             guestRequiresAuth: false,
+            longTermFacts: '',
+            messageCountSinceCondense: 0,
             scanHistory: [],
             scanHistoryByDate: {},
             medicalReports: [],

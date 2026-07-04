@@ -377,13 +377,69 @@ function AuthScreen({ onResetOnboarding }) {
     const insets = useSafeAreaInsets();
     const { setOnboarded, setGuestMode } = useStore();
     const [loading, setLoading] = useState(false);
+    const { signInWithGoogle, signInWithEmail, signUpWithEmail, signInAnonymously } = useAuth();
+    
+    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLogin, setIsLogin] = useState(true);
 
     const handleGuestSignIn = async () => {
-        setLoading(true);
-        await setGuestMode(true);
-        await setOnboarded();
-        posthog.capture('guest_mode_entered_ai_girl');
-        setLoading(false);
+        try {
+            setLoading(true);
+            const data = await signInAnonymously();
+            if (data?.user) {
+                await setGuestMode(true);
+                await setOnboarded();
+                posthog.capture('guest_mode_entered_ai_girl');
+            }
+        } catch (e) {
+            Alert.alert('Login Error', e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            setLoading(true);
+            const user = await signInWithGoogle();
+            if (user) {
+                await setOnboarded();
+                posthog.capture('google_signin_ai_girl');
+            }
+        } catch (e) {
+            Alert.alert('Login Error', e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEmailSubmit = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please enter both email and password.');
+            return;
+        }
+        try {
+            setLoading(true);
+            if (isLogin) {
+                const user = await signInWithEmail(email, password);
+                if (user) {
+                    await setOnboarded();
+                    posthog.capture('email_signin_ai_girl');
+                }
+            } else {
+                const user = await signUpWithEmail(email, password);
+                if (user) {
+                    Alert.alert('Success', 'Check your email for the confirmation link!');
+                    setIsLogin(true); // switch to login after signup
+                }
+            }
+        } catch (e) {
+            Alert.alert('Error', e.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -393,13 +449,84 @@ function AuthScreen({ onResetOnboarding }) {
                 <Text style={styles.subtitle}>Let's save your profile to start chatting.</Text>
             </Animated.View>
 
-            <TouchableOpacity 
-                onPress={handleGuestSignIn} 
-                style={[styles.primaryBtn, { marginTop: 40 }]} 
-                disabled={loading}
-            >
-                <Text style={styles.primaryBtnText}>{loading ? 'Loading...' : 'Continue as Guest'}</Text>
-            </TouchableOpacity>
+            {showEmailForm ? (
+                <Animated.View entering={ZoomIn} style={{ width: '100%', marginTop: 20 }}>
+                    <View style={styles.inputWrap}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Email"
+                            placeholderTextColor="rgba(255,255,255,0.5)"
+                            value={email}
+                            onChangeText={setEmail}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                        />
+                    </View>
+                    <View style={[styles.inputWrap, { marginTop: 16 }]}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Password"
+                            placeholderTextColor="rgba(255,255,255,0.5)"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                        />
+                    </View>
+                    
+                    <TouchableOpacity 
+                        onPress={handleEmailSubmit} 
+                        style={[styles.primaryBtn, { marginTop: 24 }]} 
+                        disabled={loading}
+                    >
+                        <Text style={styles.primaryBtnText}>{loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={{ marginTop: 20, alignItems: 'center', paddingVertical: 10 }}>
+                        <Text style={{ color: THEME.primary, fontSize: 16, fontWeight: '600' }}>
+                            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setShowEmailForm(false)} style={{ marginTop: 10, alignItems: 'center', paddingVertical: 10 }}>
+                        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: '500' }}>Back</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            ) : (
+                <Animated.View entering={ZoomIn} style={{ width: '100%', marginTop: 20, gap: 16 }}>
+                    <TouchableOpacity 
+                        onPress={handleGoogleSignIn} 
+                        style={[styles.primaryBtn, { backgroundColor: '#fff' }]} 
+                        disabled={loading}
+                        activeOpacity={0.8}
+                    >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Ionicons name="logo-google" size={24} color="#000" style={{ marginRight: 12 }} />
+                            <Text style={[styles.primaryBtnText, { color: '#000' }]}>Continue with Google</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={() => setShowEmailForm(true)} 
+                        style={[styles.primaryBtn, { backgroundColor: THEME.accent }]} 
+                        disabled={loading}
+                        activeOpacity={0.8}
+                    >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Ionicons name="mail" size={24} color="#fff" style={{ marginRight: 12 }} />
+                            <Text style={[styles.primaryBtnText, { color: '#fff' }]}>Continue with Email</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        onPress={handleGuestSignIn} 
+                        style={[styles.primaryBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }]} 
+                        disabled={loading}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={[styles.primaryBtnText, { color: '#fff' }]}>{loading ? 'Loading...' : 'Continue as Guest'}</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            )}
         </View>
     );
 }
@@ -536,7 +663,7 @@ export default function OnboardingScreen() {
     return (
         <View style={styles.container}>
             {currentSlide === 0 ? (
-                <Image source={require('../../assets/appinside1.png')} style={styles.fullBgImage} />
+                <Image source={require('../../assets/logo.png')} style={styles.fullBgImage} />
             ) : (
                 selectedAvatar && selectedAvatar.image_url && (
                     <Image source={{ uri: selectedAvatar.image_url }} style={styles.fullBgImage} />

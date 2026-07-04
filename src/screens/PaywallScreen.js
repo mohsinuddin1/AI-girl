@@ -428,7 +428,7 @@ export default function PaywallScreen({ navigation, route, isHardPaywall = false
     };
 
     return (
-        <ImageBackground source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/appinside1.png')} style={styles.container} resizeMode="cover">
+        <ImageBackground source={selectedPersona?.image_url ? { uri: selectedPersona.image_url } : require('../../assets/logo.png')} style={styles.container} resizeMode="cover">
             {/* Dark gradient overlay */}
             <View style={styles.overlay} />
 
